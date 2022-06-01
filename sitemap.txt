@@ -1,2 +1,6 @@
+https://lyotoc.github.io/2022/06/01/%E5%AD%A6%E4%B9%A0redis%E6%80%BB%E7%BB%93/
+https://lyotoc.github.io/tags/index.html
+https://lyotoc.github.io/categories/index.html
 https://lyotoc.github.io/2022/05/31/hello-world/
 https://lyotoc.github.io/
+https://lyotoc.github.io/tags/%E6%8A%80%E6%9C%AF/
