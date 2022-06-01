@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Hexo</title>
+  <title>Lyoto&#39;s Blog</title>
   
   
-  <link href="http://example.com/atom.xml" rel="self"/>
+  <link href="https://lyotoc.github.io/atom.xml" rel="self"/>
   
-  <link href="http://example.com/"/>
+  <link href="https://lyotoc.github.io/"/>
   <updated>2022-05-31T07:16:13.065Z</updated>
-  <id>http://example.com/</id>
+  <id>https://lyotoc.github.io/</id>
   
   <author>
-    <name>John Doe</name>
+    <name>Lyoto</name>
     
   </author>
   
@@ -18,8 +18,8 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="http://example.com/2022/05/31/hello-world/"/>
-    <id>http://example.com/2022/05/31/hello-world/</id>
+    <link href="https://lyotoc.github.io/2022/05/31/hello-world/"/>
+    <id>https://lyotoc.github.io/2022/05/31/hello-world/</id>
     <published>2022-05-31T07:16:13.065Z</published>
     <updated>2022-05-31T07:16:13.065Z</updated>
     
