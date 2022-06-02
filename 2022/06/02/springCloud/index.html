@@ -1,0 +1,538 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>springCloud | Lyoto's Blog</title><meta name="keywords" content="后端,Spring Cloud,微服务"><meta name="author" content="Lyoto"><meta name="copyright" content="Lyoto"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1.1 SOA与微服务的关系SOA面向服务架构，他是一种设计方法，其中包含多个服务，服务之间通过相互依赖最终提供一系列的功能。一个服务通常以独立的形式存在于操作系统进程中。各个服务之间通过网络调用。 微服务架构:其实和SOA类似，微服务是在SOA上做的升华，微服务架构强调的一个重点是“业务需要彻底的组件化和服务化”，原有的单个业务系统会拆分为多个可以独立开发、设计、运行的小应用。这些小应用之间通过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springCloud">
+<meta property="og:url" content="https://lyotoc.github.io/2022/06/02/springCloud/index.html">
+<meta property="og:site_name" content="Lyoto&#39;s Blog">
+<meta property="og:description" content="1.1 SOA与微服务的关系SOA面向服务架构，他是一种设计方法，其中包含多个服务，服务之间通过相互依赖最终提供一系列的功能。一个服务通常以独立的形式存在于操作系统进程中。各个服务之间通过网络调用。 微服务架构:其实和SOA类似，微服务是在SOA上做的升华，微服务架构强调的一个重点是“业务需要彻底的组件化和服务化”，原有的单个业务系统会拆分为多个可以独立开发、设计、运行的小应用。这些小应用之间通过">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg">
+<meta property="article:published_time" content="2022-06-02T06:23:59.000Z">
+<meta property="article:modified_time" content="2022-06-02T06:25:14.485Z">
+<meta property="article:author" content="Lyoto">
+<meta property="article:tag" content="后端">
+<meta property="article:tag" content="Spring Cloud">
+<meta property="article:tag" content="微服务">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg"><link rel="shortcut icon" href="/img/laptop.ico"><link rel="canonical" href="https://lyotoc.github.io/2022/06/02/springCloud/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'springCloud',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-06-02 14:25:14'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"><link rel="alternate" href="/atom.xml" title="Lyoto's Blog" type="application/atom+xml">
+</head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/-479e804eaf8f8540.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 类别</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 分组</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Lyoto's Blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 类别</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 分组</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">springCloud</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-06-02T06:23:59.000Z" title="发表于 2022-06-02 14:23:59">2022-06-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-06-02T06:25:14.485Z" title="更新于 2022-06-02 14:25:14">2022-06-02</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="springCloud"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-1-SOA与微服务的关系"><a href="#1-1-SOA与微服务的关系" class="headerlink" title="1.1 SOA与微服务的关系"></a>1.1 SOA与微服务的关系</h1><p><strong>SOA</strong>面向服务架构，他是一种设计方法，其中包含多个服务，服务之间通过相互依赖最终提供一系列的功能。一个服务通常以独立的形式存在于操作系统进程中。各个服务之间通过网络调用。</p>
+<p><strong>微服务架构</strong>:其实和SOA类似，微服务是在SOA上做的升华，微服务架构强调的一个重点是“业务需要彻底的组件化和服务化”，原有的单个业务系统会拆分为多个可以独立开发、设计、运行的小应用。这些小应用之间通过服务完成交互和集成。</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>SOA</th>
+<th>微服务</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>组件大小</td>
+<td>大块业务逻辑</td>
+<td>单独任务或小块业务逻辑</td>
+</tr>
+<tr>
+<td>耦合</td>
+<td>通常松耦合</td>
+<td>总是松耦合</td>
+</tr>
+<tr>
+<td>公司架构</td>
+<td>任何类型</td>
+<td>小型、专注于功能交叉团队</td>
+</tr>
+<tr>
+<td>管理</td>
+<td>着重中央管理</td>
+<td>着重分散管理</td>
+</tr>
+<tr>
+<td>目标</td>
+<td>确保应用能够交互操作</td>
+<td>执行新功能、快速拓展开发团队</td>
+</tr>
+</tbody></table>
+<h1 id="1-2-远程调用技术"><a href="#1-2-远程调用技术" class="headerlink" title="1.2 远程调用技术"></a>1.2 远程调用技术</h1><p><strong>RPC:</strong></p>
+<p>PC（Remote Procedure Call）远程过程调用，简单的理解是一个节点请求另一个节点提供的服务，直接使用TCP或UDP协议进行服务间的通信</p>
+<p><strong>http</strong></p>
+<p>RESTful</p>
+<table>
+<thead>
+<tr>
+<th>比较</th>
+<th>RESTful</th>
+<th>RPC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>通讯协议</td>
+<td>HTTP</td>
+<td>一般使用TCP</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>略低</td>
+<td>较高</td>
+</tr>
+<tr>
+<td>灵活度</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>应用</td>
+<td>微服务架构</td>
+<td>SOA架构</td>
+</tr>
+</tbody></table>
+<h1 id="1-3-Spring-Cloud"><a href="#1-3-Spring-Cloud" class="headerlink" title="1.3 Spring Cloud"></a>1.3 Spring Cloud</h1><p><strong>Spring Cloud Netflix组件</strong></p>
+<table>
+<thead>
+<tr>
+<th>组件名称</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Eureka</td>
+<td>服务注册中心</td>
+</tr>
+<tr>
+<td>Ribbon</td>
+<td>客户端负载均衡</td>
+</tr>
+<tr>
+<td>Feign</td>
+<td>声明式服务调用</td>
+</tr>
+<tr>
+<td>Hystrix</td>
+<td>客户端容错保护</td>
+</tr>
+<tr>
+<td>Zuul</td>
+<td>API服务网关</td>
+</tr>
+</tbody></table>
+<h1 id="2-服务注册Eureka"><a href="#2-服务注册Eureka" class="headerlink" title="2 服务注册Eureka"></a>2 服务注册Eureka</h1><h2 id="2-1-微服务的注册中心"><a href="#2-1-微服务的注册中心" class="headerlink" title="2.1 微服务的注册中心"></a>2.1 微服务的注册中心</h2><p>注册中心可以说是微服务架构中的“通讯录”，它记录了服务和服务地址的映射关系。在分布式架构中，服务会注册到这里，当服务需要调用其他服务时，就在这里找到服务地址，进行调用。</p>
+<h2 id="2-1-1-注册中心的主要作用"><a href="#2-1-1-注册中心的主要作用" class="headerlink" title="2.1.1 注册中心的主要作用"></a>2.1.1 注册中心的主要作用</h2><p>注册中心在微服务架构中主要起到了协调者的一个作用。注册中心一般包含如下几个功能：</p>
+<ol>
+<li><p>服务发现：服务注册&#x2F;反注册 服务订阅&#x2F;取消订阅 服务路由</p>
+</li>
+<li><p>服务配置：配置订阅 配置下发</p>
+</li>
+<li><p>服务健康检测</p>
+</li>
+</ol>
+<h2 id="2-1-2-常见的注册中心"><a href="#2-1-2-常见的注册中心" class="headerlink" title="2.1.2 常见的注册中心"></a>2.1.2 常见的注册中心</h2><ul>
+<li><p>zookeeper</p>
+</li>
+<li><p>eureka</p>
+</li>
+<li><p>consul</p>
+</li>
+<li><p>nacos</p>
+</li>
+</ul>
+<h3 id="使用Eureka"><a href="#使用Eureka" class="headerlink" title="使用Eureka"></a>使用Eureka</h3><ol>
+<li><p>搭建eureka server</p>
+<ol>
+<li><p>创建工程</p>
+<p>在项目的project下新建module子模块</p>
+</li>
+<li><p>导入坐标</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--注册中心坐标--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span>    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>配置<code>application.yml</code></p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line"> <span class="attr">port:</span> <span class="number">8761</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line"> <span class="attr">instance:</span></span><br><span class="line">   <span class="attr">hostname:</span> <span class="string">localhost</span></span><br><span class="line"> <span class="attr">client:</span></span><br><span class="line">   <span class="attr">registerWithEureka:</span> <span class="literal">false</span>  </span><br><span class="line">   <span class="attr">fetchRegistry:</span> <span class="literal">false</span></span><br><span class="line">   <span class="attr">serviceUrl:</span></span><br><span class="line">     <span class="attr">defaultZone:</span> <span class="string">http://$&#123;eureka.instance.hostname&#125;:$&#123;server.port&#125;/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>registerWithEureka: 是否将自己注册到Eureka服务中，本身就是所以无需注册 </p>
+<p>fetchRegistry : 是否从Eureka中获取注册信息 </p>
+<p>serviceUrlEureka: 客户端与Eureka服务端进行交互的地址</p>
+</blockquote>
+</li>
+<li><p>配置启动类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="comment">//激活eureka服务</span></span><br><span class="line"><span class="meta">@EnableEurekaServer</span> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EurekaServerApplication</span> &#123;</span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"> SpringApplication.run(EurekaServerApplication.class, args);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p>将服务提供者注册到eureka server上</p>
+<ol>
+<li><p>引入eureka相应的坐标</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--引入rureka客户端坐标--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>修改<code>application.yml</code>添加eureka server的信息</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka:</span></span><br><span class="line"> <span class="attr">client:</span></span><br><span class="line">   <span class="attr">serviceUrl:</span> <span class="comment"># eureka server的路径</span></span><br><span class="line">     <span class="attr">defaultZone:</span> <span class="string">http://localhost:8761/eureka/</span></span><br><span class="line">   <span class="comment">#非必要  </span></span><br><span class="line"> <span class="attr">instance:</span></span><br><span class="line">   <span class="attr">prefer-ip-address:</span> <span class="literal">true</span> <span class="comment">#使用ip注册</span></span><br></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>修改启动类 添加服务发现的支持</p>
+</li>
+</ol>
+</li>
+<li><p>服务消费者通过注册中心获取服务列表，并调用</p>
+</li>
+</ol>
+<p>​	eureka中的元数据：服务的主机名，IP地址等信息，可以通过eureka server进行获取，用于服务之间调用</p>
+<h3 id="eureka集群、高可用的引入"><a href="#eureka集群、高可用的引入" class="headerlink" title="eureka集群、高可用的引入"></a>eureka集群、高可用的引入</h3><p><img src="/Users/apple/Desktop/%25E4%25BC%2581%25E4%25B8%259A%25E5%25BE%25AE%25E4%25BF%25A120210817165148.png"></p>
+<p>1、准备2个eureka server，需要相互注册</p>
+<p>​	1 号server：9000</p>
+<p>​	2 号server：8000</p>
+<p>2、需要将微服务注册到两个eureka server上</p>
+<h3 id="细节问题"><a href="#细节问题" class="headerlink" title="细节问题"></a>细节问题</h3><h4 id="在控制台显示服务IP"><a href="#在控制台显示服务IP" class="headerlink" title="在控制台显示服务IP"></a>在控制台显示服务IP</h4><p>在服务提供者，通过eureka.instance.instance-id配置控制台显示服务IP</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:9000/eureka/</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">prefer-ip-address:</span> <span class="literal">true</span> <span class="comment"># 使用ip地址注册</span></span><br><span class="line">    <span class="attr">instance-id:</span> <span class="string">$&#123;spring.cloud.client.ip-address&#125;:$&#123;server.port&#125;</span> <span class="comment">#想注册中心中注册服务id</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="eureka的服务剔除问题"><a href="#eureka的服务剔除问题" class="headerlink" title="eureka的服务剔除问题"></a>eureka的服务剔除问题</h4><p>默认每隔30s发送心跳，如果90s内没有发送心跳代表宕机</p>
+<p>在服务的提供者，设置心跳间隔，设置续约到期时间</p>
+<h4 id="eureka的自我保护机制"><a href="#eureka的自我保护机制" class="headerlink" title="eureka的自我保护机制"></a>eureka的自我保护机制</h4><p>在eureka中配置关闭自我保护和剔除服务间隔</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">localhost</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">register-with-eureka:</span> <span class="literal">false</span> <span class="comment">#是否将自己注册到注册中心</span></span><br><span class="line">    <span class="attr">fetch-registry:</span> <span class="literal">false</span> <span class="comment">#是否要从eureka中获取注册信息</span></span><br><span class="line">    <span class="attr">service-url:</span> <span class="comment">#配置暴露给Eureka Client的请求地址</span></span><br><span class="line">      <span class="attr">defalutZone:</span> <span class="string">http://$&#123;eureka.instance.hostname&#125;:$&#123;server.port&#125;/eureka/</span></span><br><span class="line">  <span class="attr">server:</span></span><br><span class="line">    <span class="attr">enable-self-preservation:</span> <span class="literal">false</span> <span class="comment"># 关闭自我保护机制</span></span><br><span class="line">    <span class="attr">eviction-interval-timer-in-ms:</span> <span class="number">4000</span> <span class="comment"># 设置剔除服务间隔</span></span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-eureka源码解析"><a href="#2-2-eureka源码解析" class="headerlink" title="2.2 eureka源码解析"></a>2.2 eureka源码解析</h2><h3 id="2-2-1-SpringBoot中的自动装载"><a href="#2-2-1-SpringBoot中的自动装载" class="headerlink" title="2.2.1 SpringBoot中的自动装载"></a>2.2.1 SpringBoot中的自动装载</h3><h4 id="1-ImportSelector"><a href="#1-ImportSelector" class="headerlink" title="(1) ImportSelector"></a>(1) ImportSelector</h4><p>ImportSelector接口是Spring导入外部配置的核心接口，在SpringBoot的自动化配置和@EnableXXX(功能性注解)中起到了决定性作用。当在@Configuration标注的Class上使用@Import引入了一个ImportSelector实现类后，会把实现类中返回的Class名称都定义为Bean。</p>
+<p><img src="/Users/apple/Desktop/%25E4%25BC%2581%25E4%25B8%259A%25E5%25BE%25AE%25E4%25BF%25A120210820162313.png" alt="企业微信20210820162313"></p>
+<h4 id="2-EnableEurekaServer"><a href="#2-EnableEurekaServer" class="headerlink" title="(2) EnableEurekaServer"></a>(2) EnableEurekaServer</h4><p><img src="/Users/apple/Desktop/%25E4%25BC%2581%25E4%25B8%259A%25E5%25BE%25AE%25E4%25BF%25A120210823094837.png" alt="企业微信20210823094837"></p>
+<h1 id="3-服务调用Ribbon"><a href="#3-服务调用Ribbon" class="headerlink" title="3. 服务调用Ribbon"></a>3. 服务调用Ribbon</h1><p>经过以上的学习，已经实现了服务的注册和服务发现，当启动某个服务时，可以通过HTTP的形式将信息注册到注册中心，并且可以通过SpringCloud提供的工具获取注册中心的服务列表。但是服务之间的调用还存在很多的问题，如何更加方便的调用微服务，多个微服务的提供者如何选择，如何均衡负载等。</p>
+<h2 id="3-1-Ribbon概述"><a href="#3-1-Ribbon概述" class="headerlink" title="3.1 Ribbon概述"></a>3.1 Ribbon概述</h2><h3 id="3-1-1-什么是Ribbon"><a href="#3-1-1-什么是Ribbon" class="headerlink" title="3.1.1 什么是Ribbon"></a>3.1.1 什么是Ribbon</h3><p>是netflix发布的一个负载均衡器，有助于控制HTTP和TCP客户端行为。在SpringCloud中，Eureka一般配合Ribbon进行使用，Ribbon提供了客户端负载均衡的功能，Ribbon利用从Eureka中读取到的服务信息，在调用服务节点提供的服务时，会合理的进行负载。</p>
+<p>在SpringCloud中可以将注册中心和Ribbon配合使用，Ribbon自动的从注册中心获取服务提供者的列表信息，并基于内置的负载均衡算法，请求服务。</p>
+<h3 id="3-1-2-Ribbon的主要作用"><a href="#3-1-2-Ribbon的主要作用" class="headerlink" title="3.1.2 Ribbon的主要作用"></a>3.1.2 Ribbon的主要作用</h3><h4 id="1-服务调用"><a href="#1-服务调用" class="headerlink" title="(1) 服务调用"></a>(1) 服务调用</h4><p>基于Ribbon实现服务调用，是通过拉取到的所用服务列表组成(服务名-请求路径的)映射关系。借助RestTemplate最终进行调用。</p>
+<h4 id="2-负载均衡"><a href="#2-负载均衡" class="headerlink" title="(2) 负载均衡"></a>(2) 负载均衡</h4><p>当有多个服务提供者时，Ribbon可以根据负载均衡的算法自动的选择需要调用的服务地址。</p>
+<p>Ribbon是一个典型的客户端负载均衡器。Ribbon会获取服务的所有地址，根据内部的负载均衡算法，获取本次请求的有效地址。</p>
+<p>准备两个商品微服务(9001),(9011)</p>
+<p>在订单系统中远程以负载均衡的形式调用商品服务</p>
+<h4 id="3-负载均衡策略"><a href="#3-负载均衡策略" class="headerlink" title="(3) 负载均衡策略"></a>(3) 负载均衡策略</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">com.netflix.loadbalancer.RoudRobinRule  <span class="comment">//以轮询的方式进行负载均衡</span></span><br><span class="line">com.netflix.loadbalancer.RandomRule <span class="comment">//随机策略</span></span><br><span class="line">com.netflix.loadbalancer.RetryRule <span class="comment">//重试策略</span></span><br><span class="line">com.netflix.loadbalancer.weightedResponseTimeRule <span class="comment">//权重策略，会计算每个服务的权重，越高的调用的可能性越大</span></span><br><span class="line">com.netflix.loadbalancer.BestAvailableRule <span class="comment">//最佳策略，遍历所有的服务实例，过滤掉故障实例，并返回请求数最小的实例返回</span></span><br><span class="line">com.netflix.loadbalancer.AvailabilityFilteringRule <span class="comment">//可用过滤策略。过滤掉故障和请求数超过阈值的服务实例，再从剩下的实例中轮询调用</span></span><br></pre></td></tr></table></figure>
+
+<p>在服务消费者的application.yml配置文件中修改负载均衡策略</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改ribbon的负载均衡策略  服务名 - ribbon - NFLoadBalancerRuleClassName : 策略</span></span><br><span class="line"><span class="attr">product-service:</span></span><br><span class="line">  <span class="attr">ribbon:</span></span><br><span class="line">    <span class="attr">NFLoadBalancerRuleClassName:</span> <span class="string">com.netflix.loadbalancer.RandomRule</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="4-重试机制"><a href="#4-重试机制" class="headerlink" title="(4) 重试机制"></a>(4) 重试机制</h4><p>引入spring的重试组件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.retry<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-retry<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>对ribbon进行重试配置</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">product-service:</span></span><br><span class="line">  <span class="attr">ribbon:</span></span><br><span class="line"><span class="comment">#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule</span></span><br><span class="line">    <span class="attr">ConnectTimeout:</span> <span class="number">250</span> <span class="comment"># Ribbon的连接超时时间</span></span><br><span class="line">    <span class="attr">ReadTimeout:</span> <span class="number">1000</span> <span class="comment"># Ribbon的数据读取超时时间</span></span><br><span class="line">    <span class="attr">OkToRetryOnAllOperation:</span> <span class="literal">true</span> <span class="comment"># 是否对所有操作都进行重试</span></span><br><span class="line">    <span class="attr">MaxAutoRetriesNextServer:</span> <span class="number">1</span> <span class="comment"># 切换实例的重试次数</span></span><br><span class="line">    <span class="attr">MaxAutoRetries:</span> <span class="number">1</span> <span class="comment"># 对当前实例的重试次数</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="5-Ribbon源码解析"><a href="#5-Ribbon源码解析" class="headerlink" title="(5) Ribbon源码解析"></a>(5) Ribbon源码解析</h4><p><img src="/Users/apple/Desktop/%25E4%25BC%2581%25E4%25B8%259A%25E5%25BE%25AE%25E4%25BF%25A120210826114004.png" alt="企业微信20210826114004"></p>
+<h1 id="4-Consul"><a href="#4-Consul" class="headerlink" title="4.Consul"></a>4.Consul</h1><p>特性：</p>
+<p>服务发现</p>
+<p>健康检查</p>
+<p>K&#x2F;V存储</p>
+<p>多数据中心</p>
+<h3 id="4-1-1-consul和eureka区别"><a href="#4-1-1-consul和eureka区别" class="headerlink" title="4.1.1 consul和eureka区别"></a>4.1.1 consul和eureka区别</h3><h4 id="1-一致性"><a href="#1-一致性" class="headerlink" title="(1) 一致性"></a>(1) 一致性</h4><p>consul强一致性(CP)</p>
+<p>​	服务注册相比eureka会稍慢一些。因为consul的raft协议要求必须过半数的结点都写入成功才认为注册成功</p>
+<p>​	leader挂掉时，重选期间整个consul不可用，保证了强一致性但牺牲了可用性</p>
+<p>eureka保证高可用和最终一致性(AP)</p>
+<p>​	服务注册相对较快</p>
+<p>​	当数据出现不一致时，虽然A,B上的注册信息不完全相同，但每个Eureka节点依然能够正常对外提供服务，这会出现查询服务信息时如果请求A查不到，但请求B就能查到，保证了可用性但牺牲了一致性</p>
+<h4 id="2-开发语言和使用"><a href="#2-开发语言和使用" class="headerlink" title="(2) 开发语言和使用"></a>(2) 开发语言和使用</h4><p>eureka就是个servlet程序，跑在servlet容器中</p>
+<p>consul则是go编写而成，安装启动即可</p>
+<h1 id="5-服务调用Feign"><a href="#5-服务调用Feign" class="headerlink" title="5.服务调用Feign"></a>5.服务调用Feign</h1><h2 id="5-1-Feign简介"><a href="#5-1-Feign简介" class="headerlink" title="5.1 Feign简介"></a>5.1 Feign简介</h2><p>Feign是netfilx开发的声明式，模板化的HTTP客户端，其灵感来自Retrofit, JAXR-2.0以及WebSocket</p>
+<p>​	Feign可以帮助我们更加便捷，优雅的调用HTTP</p>
+<p>​	在SpringCloud中，使用Feign非常简单–创建一个接口，并在接口上添加一些注解，代码就完成了。</p>
+<p>​	Feign支持多种注解，例如Feign自带的注解或者JAX-RS注解等</p>
+<p>​	SpringCloud对Feign进行了增强，使Feign支持了SprimgMVC注解，并整合了Ribbon和Eureka，从而让Feign的使用更加方便</p>
+<p>​	Feign是在Ribbon的基础上进行了一次改进，是一个使用起来更加方便的HTTP客户端。采用接口的方式，只需要创建一个接口，在上面添加注解即可，将需要调用的其他服务的方法定义成抽象方法即可，不需要自己构建HTTP请求，然后就像是调用自身工程的方法调用，而感觉不到是调用远程方法，使得编写客户端变得非常容易</p>
+<h2 id="5-2-基于Feign的服务调用"><a href="#5-2-基于Feign的服务调用" class="headerlink" title="5.2 基于Feign的服务调用"></a>5.2 基于Feign的服务调用</h2><h4 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="(1) 引入依赖"></a>(1) 引入依赖</h4><p>在服务消费者shop_order-service添加Feign依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-feign<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.4.6.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-配置调用接口"><a href="#2-配置调用接口" class="headerlink" title="(2) 配置调用接口"></a>(2) 配置调用接口</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 声明需要调用的微服务名称</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@FeignClient</span></span></span><br><span class="line"><span class="comment"> *      * name: 服务提供者的名称</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@FeignClient(name = &quot;product-sercvice&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ProductFeignClient</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置需要调用的微服务接口</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/product/&#123;id&#125;&quot;,method = RequestMethod.GET)</span></span><br><span class="line">    <span class="keyword">public</span> Product <span class="title function_">findById</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Long id)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-在启动类激活Feign"><a href="#3-在启动类激活Feign" class="headerlink" title="(3) 在启动类激活Feign"></a>(3) 在启动类激活Feign</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EntityScan(&quot;cn.itcast.order.entity&quot;)</span></span><br><span class="line"><span class="meta">@EnableEurekaClient</span></span><br><span class="line"><span class="comment">//激活feign</span></span><br><span class="line"><span class="meta">@EnableFeignClients</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OrderApplication</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="4-通过自动的接口调用远程服务"><a href="#4-通过自动的接口调用远程服务" class="headerlink" title="(4) 通过自动的接口调用远程服务"></a>(4) 通过自动的接口调用远程服务</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> ProductFeignClient productFeignClient;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RequestMapping(value = &quot;/buy/&#123;id&#125;&quot;,method = RequestMethod.GET)</span></span><br><span class="line"><span class="keyword">public</span> Product <span class="title function_">findById</span><span class="params">(<span class="meta">@PathVariable</span> Long id)</span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="type">Product</span> <span class="variable">product</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    product = productFeignClient.findById(id);</span><br><span class="line">    <span class="keyword">return</span> product;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-3-负载均衡"><a href="#5-3-负载均衡" class="headerlink" title="5.3 负载均衡"></a>5.3 负载均衡</h2><p>Feign中本身已经集成了Ribbon依赖和自动配置，因此我们不需要额外引入依赖，也不需要再注册RestTemplate对象。</p>
+<h1 id="6-服务调用Feign高级"><a href="#6-服务调用Feign高级" class="headerlink" title="6 服务调用Feign高级"></a>6 服务调用Feign高级</h1><h2 id="6-1-Feign的配置"><a href="#6-1-Feign的配置" class="headerlink" title="6.1 Feign的配置"></a>6.1 Feign的配置</h2><p>从SpringCloud Edgware开始，Feign支持使用属性自定义Feign。对于一个指定名称的FeignClient，Feign支持如下配置</p>
+<p>​	feignName: FeignClient的名称</p>
+<p>​	connectTimeout：建立链接的超时时长</p>
+<p>​	readTimeout：读取超时时长</p>
+<p>​	loggerLevel：Feign的日志级别</p>
+<p>​	errorDecoder：Feign的错误解码器</p>
+<p>​	retryer: 配置重试</p>
+<p>​	requestInterceptors：添加请求拦截器</p>
+<p>​	decoder404：配置熔断不处理404异常</p>
+<h2 id="6-2-请求压缩"><a href="#6-2-请求压缩" class="headerlink" title="6.2 请求压缩"></a>6.2 请求压缩</h2><p>SpringCloud Feign支持对请求和响应进行GZIP压缩，以减少通信过程中的性能损耗，通过下面的参数即可开启请求与响应的压缩功能：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">feign:</span></span><br><span class="line">	<span class="attr">compression:</span></span><br><span class="line">		<span class="attr">request:</span></span><br><span class="line">			<span class="attr">enabled:</span> <span class="literal">true</span> <span class="comment">#开启请求压缩</span></span><br><span class="line">		<span class="attr">response:</span></span><br><span class="line">			<span class="attr">enabled:</span> <span class="literal">true</span> <span class="comment">#开启响应压缩</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="6-3-日志级别"><a href="#6-3-日志级别" class="headerlink" title="6.3 日志级别"></a>6.3 日志级别</h2><p>在开发或者运行阶段往往希望看到Feign请求过程的日志记录，默认情况下Feign的日志是没有开启的。要想用属性配置方式来达到日志效果，只需在application.yml中添加如下内容即可</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">feign:</span></span><br><span class="line">	<span class="attr">client:</span></span><br><span class="line">		<span class="attr">config:</span></span><br><span class="line">			<span class="attr">shop-product-service:</span></span><br><span class="line">				<span class="attr">loggerLevel:</span> <span class="string">FULL</span></span><br><span class="line"><span class="attr">logging:</span></span><br><span class="line">	<span class="attr">level:</span></span><br><span class="line">		<span class="attr">cn.itcast.order.feign.ProductFeignClient:</span> <span class="string">debug</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="6-4-Feign和Ribbon的区别"><a href="#6-4-Feign和Ribbon的区别" class="headerlink" title="6.4 Feign和Ribbon的区别"></a>6.4 Feign和Ribbon的区别</h2><p>Ribbon是一个客户端的负载均衡器</p>
+<p>Feign是在Ribbon的基础上进行了封装</p>
+<h2 id="6-5-组件的使用方式"><a href="#6-5-组件的使用方式" class="headerlink" title="6.5 组件的使用方式"></a>6.5 组件的使用方式</h2><h3 id="6-5-1-注册中心"><a href="#6-5-1-注册中心" class="headerlink" title="6.5.1 注册中心"></a>6.5.1 注册中心</h3><h4 id="1-Eureka"><a href="#1-Eureka" class="headerlink" title="(1) Eureka"></a>(1) Eureka</h4><p>​	搭建注册中心</p>
+<p>​		引入依赖 spring-cloud-starter-netflix-eureka-server</p>
+<p>​		配置EurekaServer</p>
+<p>​		通过@EnableEurekaServer激活Eureka Server端配置</p>
+<p>​	服务注册</p>
+<p>​		服务提供者引入 spring-cloud-starter-netflix-eureka-client依赖</p>
+<p>​		通过eureka.client.serviceUrl.defaultZone 配置注册中心地址</p>
+<h4 id="2-consul"><a href="#2-consul" class="headerlink" title="(2) consul"></a>(2) consul</h4><p>​	搭建注册中心</p>
+<p>​		下载安装consul</p>
+<p>​		启动consul consul agent -dev</p>
+<p>​	服务注册</p>
+<p>​		服务提供者引入spring-cloud-starter-consul-discovery</p>
+<p>​		通过spring.cloud.consul.host和spring.cloud.consul.port指定Consul Server的请求地址</p>
+<h3 id="6-5-2-服务调用"><a href="#6-5-2-服务调用" class="headerlink" title="6.5.2 服务调用"></a>6.5.2 服务调用</h3><h4 id="1-Ribbon"><a href="#1-Ribbon" class="headerlink" title="(1) Ribbon"></a>(1) Ribbon</h4><p>​		通过Ribbon结合RestTemplate方式进行服务调用只需要在声明RestTemplate的方法上添加注解@LoadBalanced 即可</p>
+<p>​		可以通过{服务名称}.ribbon.NFLoadBalancerRuleClassName配置负载均衡策略</p>
+<h4 id="2-Feign"><a href="#2-Feign" class="headerlink" title="(2) Feign"></a>(2) Feign</h4><p>​		服务消费者引入spring-cloud-starter-openfeign依赖</p>
+<p>​		通过@FeignClient声明一个调用远程微服务接口</p>
+<p>​		启动类上通过@EnableFeignClient激活Feign</p>
+<h2 id="6-1-微服务架构的高并发问题"><a href="#6-1-微服务架构的高并发问题" class="headerlink" title="6.1 微服务架构的高并发问题"></a>6.1 微服务架构的高并发问题</h2><p>通过注册中心已经实现了微服务的服务注册和服务发现,并且通过Ribbon实现了负载均衡，已经借助Feign可以优雅的进行微服务调用。那么我们编写的微服务的性能怎么样呢？是否存在问题？</p>
+<h3 id="6-1-1-性能测试工具Jmeter"><a href="#6-1-1-性能测试工具Jmeter" class="headerlink" title="6.1.1 性能测试工具Jmeter"></a>6.1.1 性能测试工具Jmeter</h3><p>用来进行压力测试</p>
+<h2 id="6-2-系统负载过高存在的问题"><a href="#6-2-系统负载过高存在的问题" class="headerlink" title="6.2 系统负载过高存在的问题"></a>6.2 系统负载过高存在的问题</h2><h3 id="6-2-1-问题分析"><a href="#6-2-1-问题分析" class="headerlink" title="6.2.1 问题分析"></a>6.2.1 问题分析</h3><p>在微服务架构中，我们将业务拆分成一个个的服务，服务与服务之间可以相互调用，由于网络原因或者自身的原因，服务并不能保证服务的100%可用，如果单个服务出现问题，调用这个服务就会出现网络延迟，此时若有大量的网络涌入，会形成任务累计，导致服务瘫痪。</p>
+<p>在SpringBoot程序中，默认使用内置tomcat作为web服务器。单tomcat支持最大的并发请求是有限的，如果某一接口阻塞，待执行的任务积压越来越多，那么势必会影响其他接口的调用。</p>
+<h3 id="6-2-2-线程池的形式实现服务隔离"><a href="#6-2-2-线程池的形式实现服务隔离" class="headerlink" title="6.2.2 线程池的形式实现服务隔离"></a>6.2.2 线程池的形式实现服务隔离</h3><p><img src="/Users/apple/Desktop/%25E4%25BC%2581%25E4%25B8%259A%25E5%25BE%25AE%25E4%25BF%25A120210830111824.png" alt="企业微信20210830111824"></p>
+<h1 id="7-服务熔断Hystrix入门"><a href="#7-服务熔断Hystrix入门" class="headerlink" title="7.服务熔断Hystrix入门"></a>7.服务熔断Hystrix入门</h1><h2 id="7-1-服务容错的核心知识"><a href="#7-1-服务容错的核心知识" class="headerlink" title="7.1 服务容错的核心知识"></a>7.1 服务容错的核心知识</h2><h3 id="7-1-1-雪崩效应"><a href="#7-1-1-雪崩效应" class="headerlink" title="7.1.1 雪崩效应"></a>7.1.1 雪崩效应</h3><p>在微服务架构中，一个请求需要调用多个服务是非常常见的。如客户端访问A服务，而A服务需要调用B服务，B服务需要调用C服务，由于网络原因或者自身的原因，如果B服务或者C服务不能及时响应，A服务将处于阻塞状态，直到B服务C服务响应。此时若有大量的请求涌入，容器的线程资源会被消耗完毕，导致服务瘫痪。服务于服务之间的依赖性，故障会传播，造成连锁反应，会对整个微服务系统造成灾难性的严重后果，这就是服务故障的“雪崩”效应。</p>
+<p>雪崩是系统中的蝴蝶效应导致其发生的原因多种多样，有不合理的容量设计，或者是高并发下某一个方法</p>
+<h1 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h1><h2 id="zuul网关"><a href="#zuul网关" class="headerlink" title="zuul网关"></a>zuul网关</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><blockquote>
+<p>ZUUL是Netﬂix开源的微服务网关，它可以和Eureka、Ribbon、Hystrix等组件配合使用，Zuul组件的核心是一系列的过滤器，这些过滤器可以完成以下功能：</p>
+</blockquote>
+<ul>
+<li><strong>动态路由</strong>：动态将请求路由到不同后端集群</li>
+<li><strong>压力测试</strong>：逐渐增加指向集群的流量，以了解性能 </li>
+<li><strong>负载分配</strong>：为每一种负载类型分配对应容量，并弃用超出限定值的请求 </li>
+<li><strong>静态响应处理</strong>：边缘位置进行响应，避免转发到内部集群 </li>
+<li><strong>身份认证和安全</strong>: 识别每一个资源的验证要求，并拒绝那些不符的请求。Spring Cloud对Zuul进行了整合和增强。</li>
+</ul>
+<h3 id="搭建zuul网关服务器"><a href="#搭建zuul网关服务器" class="headerlink" title="搭建zuul网关服务器"></a>搭建zuul网关服务器</h3><ol>
+<li>创建工程导入坐标</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-zuul<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.2.9.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>配置启动类，开启网关服务器功能</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootAplication</span></span><br><span class="line"><span class="comment">//开启zuul网关功能</span></span><br><span class="line"><span class="meta">@EnableZuulproxy</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ZuulServerApplication</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        SpringApplication.run(ZuulServerApplication.class,args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置文件</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">	<span class="string">port:8080</span> <span class="comment">#端口</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">	<span class="attr">application:</span></span><br><span class="line">		<span class="string">name:api-zuul-server</span> <span class="comment">#服务名称</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h3><p>路由：根据请求的URL，将请求分配到对应的微服务中进行处理</p>
+<ol>
+<li><h4 id="基础路由配置"><a href="#基础路由配置" class="headerlink" title="基础路由配置"></a>基础路由配置</h4><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#路由配置</span></span><br><span class="line"><span class="attr">zuul:</span></span><br><span class="line">	<span class="attr">routes:</span></span><br><span class="line">		<span class="comment">#商品微服务</span></span><br><span class="line">		<span class="attr">product-service:</span> <span class="comment">#路由id，随便写</span></span><br><span class="line">			<span class="attr">path:</span> <span class="string">/product-service/**</span>    <span class="comment"># 输入的映射路径 localhost:8080/product-service/xxxx</span></span><br><span class="line">			<span class="attr">url:</span> <span class="string">http://127.0.0.1:9001</span> 	 <span class="comment">#映射路径对应的微服务的url地址</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><h4 id="面向服务的路由"><a href="#面向服务的路由" class="headerlink" title="面向服务的路由"></a>面向服务的路由</h4><blockquote>
+<p>微服务一般是由几十、上百个服务组成，对于一个URL请求，最终会确认一个服务实例进行处理。如果对每个服务实例手动指定一个唯一访问地址，然后根据URL去手动实现请求匹配，这样做显然就不合理。 Zuul支持与Eureka整合开发，根据ServiceID自动的从注册中心中获取服务地址并转发请求，这样做的好处不仅可以通过单个端点来访问应用的所有服务，而且在添加或移除服务实例的时候不用修改Zuul的路由配置。</p>
+</blockquote>
+<ol>
+<li><p>添加eureka-client依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span> <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span> <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>开启eureka的客户端服务发现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span> <span class="meta">@EnableZuulProxy</span> <span class="comment">// 开启Zuul的网关功能 @EnableDiscoveryClient public class ZuulServerApplication &#123; public static void main(String[] args) &#123; SpringApplication.run(ZuulServerApplication.class, args); &#125; &#125;</span></span><br></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>在zuul网关服务中心配置eureka的注册中心相关信息</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka: client: serviceUrl: defaultZone: http://127.0.0.1:8761/eureka/ registry-fetch-interval-seconds:</span> <span class="number">5</span> <span class="comment"># 获取服务列表的周期：5s instance: preferIpAddress: true ip-address: 127.0.0.1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改路由中的映射配置</p>
+<blockquote>
+<p>通过服务名称获取，因为已经有了Eureka客户端，我们可以从Eureka获取服务的地址信息，因此映射时无需指定IP地址，而</p>
+<p>是通过服务名称来访问，而且Zuul已经集成了Ribbon的负载均衡功能。</p>
+</blockquote>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#配置路由规则 </span></span><br><span class="line"><span class="attr">zuul: routes: product-service:</span> <span class="comment"># 这里是路由id，随意写 </span></span><br><span class="line"><span class="attr">path:</span> <span class="string">/product-service/**</span> <span class="comment"># 这里是映射路径 </span></span><br><span class="line"><span class="attr">serviceId:</span> <span class="string">shop-service-product</span> <span class="comment">#配置转发的微服务名称</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>serviceId</strong>: 指定需要转发的微服务实例名称</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p><strong>简化的路由配置</strong></p>
+<p>在刚才的配置中，我们的规则是这样的：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">zuul.routes.&lt;route&gt;.path=/xxx/**</span> <span class="string">：</span> <span class="string">来指定映射路径。</span> <span class="string">&lt;route&gt;</span> <span class="string">是自定义的路由名</span></span><br><span class="line"></span><br><span class="line"><span class="string">zuul.routes.&lt;route&gt;.serviceId=/product-service</span> <span class="string">：来指定服务名。</span></span><br></pre></td></tr></table></figure>
+
+<p>而大多数情况下，我们的 <code>&lt;route&gt;</code> 路由名称往往和服务名会写成一样的。因此Zuul就提供了一种简化的配置语法：<code>zuul routes.&lt;serviceId&gt;=&lt;path&gt;</code></p>
+<p>上面的配置可以简化为一条：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">zuul: routes: shop-service-product:</span> <span class="string">/product-service/**</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>默认的路由规则</strong></p>
+<p>在使用Zuul的过程中，上面讲述的规则已经大大的简化了配置项。但是当服务较多时，配置也是比较繁</p>
+<p>琐的。</p>
+<p>因此Zuul就指定了默认的路由规则：</p>
+<p>默认情况下，一切服务的<strong>映射路径</strong>就是服务名<strong>本身</strong>。</p>
+<p>例如服务名为： shop-service-product ，则默认的映射路径就是： &#x2F;shop-service- </p>
+<p>product&#x2F;**</p>
+</li>
+</ol>
+<h3 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h3><h4 id="ZuulFilter"><a href="#ZuulFilter" class="headerlink" title="ZuulFilter"></a>ZuulFilter</h4><ul>
+<li><p><strong>简介</strong></p>
+<p>Zuul 中的过滤器跟我们之前使用的 <code>javax.servlet.Filter</code> 不一样，<code>javax.servlet.Filter</code> 只有一种类型，可</p>
+<p>以通过配置 <code>urlPatterns </code>来拦截对应的请求。而 Zuul 中的过滤器总共有 4 种类型，且每种类型都有对</p>
+<p>应的使用场景。 </p>
+<ol>
+<li><strong>PRE</strong>：这种过滤器在请求被路由之前调用。我们可利用这种过滤器实现身份验证、在集群中选择请</li>
+</ol>
+<p>求的微服务、记录调试信息等。</p>
+<ol start="2">
+<li><strong>ROUTING</strong>：这种过滤器将请求路由到微服务。这种过滤器用于构建发送给微服务的请求，并使用</li>
+</ol>
+<p><code>Apache HttpClient</code>或<code>Netfifilx Ribbon</code>请求微服务。</p>
+<ol start="3">
+<li><strong>POST</strong>：这种过滤器在路由到微服务以后执行。这种过滤器可用来为响应添加标准的HTTP</li>
+</ol>
+<p>Header、收集统计信息和指标、将响应从微服务发送给客户端等。</p>
+<ol start="4">
+<li><strong>ERROR</strong>：在其他阶段发生错误时执行该过滤器。</li>
+</ol>
+</li>
+</ul>
+<p>Zuul提供了自定义过滤器的功能实现起来也十分简单，只需要编写一个类去实现zuul提供的接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> ZuulFilter <span class="keyword">implements</span> <span class="title class_">IZuulFilter</span>&#123;</span><br><span class="line">    <span class="keyword">abstract</span> <span class="keyword">public</span> String <span class="title function_">filterType</span><span class="params">()</span>; </span><br><span class="line">    <span class="keyword">abstract</span> <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">filterOrder</span><span class="params">()</span>; </span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">shouldFilter</span><span class="params">()</span>;<span class="comment">// 来自IZuulFilter </span></span><br><span class="line">    Object <span class="title function_">run</span><span class="params">()</span> <span class="keyword">throws</span> ZuulException;<span class="comment">// IZuulFilter</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://i.niupic.com/images/2021/09/06/9uyQ.jpg"></p>
+<h5 id="内部源码"><a href="#内部源码" class="headerlink" title="内部源码"></a>内部源码</h5><p><strong>自定义过滤器</strong></p>
+<p>接下来我们来自定义一个过滤器，模拟一个登录的校验。基本逻辑：如果请求中有access-token参数，则认为请求有效，放行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LoginFilter</span> <span class="keyword">extends</span> <span class="title class_">ZuulFilter</span>&#123; </span><br><span class="line">    <span class="meta">@Override</span> </span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">filterType</span><span class="params">()</span> &#123; </span><br><span class="line">        <span class="comment">// 登录校验，肯定是在前置拦截 </span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;pre&quot;</span>; &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">filterOrder</span><span class="params">()</span> &#123; </span><br><span class="line">        <span class="comment">// 顺序设置为1 </span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>; &#125;</span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">shouldFilter</span><span class="params">()</span> &#123; </span><br><span class="line">        <span class="comment">// 返回true，代表过滤器生效。 </span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;<span class="meta">@Override</span> </span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">run</span><span class="params">()</span> <span class="keyword">throws</span> ZuulException &#123; </span><br><span class="line">        <span class="comment">// 登录校验逻辑。</span></span><br><span class="line">        <span class="comment">// 1）获取Zuul提供的请求上下文对象</span></span><br><span class="line">        <span class="type">RequestContext</span> <span class="variable">ctx</span> <span class="operator">=</span> RequestContext.getCurrentContext();</span><br><span class="line">    <span class="comment">// 2) 从上下文中获取request对象 </span></span><br><span class="line">        <span class="type">HttpServletRequest</span> <span class="variable">req</span> <span class="operator">=</span> ctx.getRequest(); </span><br><span class="line">   <span class="comment">// 3) 从请求中获取</span></span><br><span class="line">        token <span class="type">String</span> <span class="variable">token</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;access-token&quot;</span>); </span><br><span class="line">        <span class="comment">// 4) 判断 </span></span><br><span class="line">        <span class="keyword">if</span>(token == <span class="literal">null</span> || <span class="string">&quot;&quot;</span>.equals(token.trim()))&#123;</span><br><span class="line">            <span class="comment">// 没有token，登录校验失败，拦截 </span></span><br><span class="line">            ctx.setSendZuulResponse(<span class="literal">false</span>); </span><br><span class="line">            <span class="comment">// 返回401状态码。也可以考虑重定向到登录页。</span></span><br><span class="line">            ctx.setResponseStatusCode(HttpStatus.UNAUTHORIZED.value()); &#125;<span class="comment">// 校验通过，可以考虑把用户信息放入上下文，继续向后执行 </span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>; </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>RequestContext</code>：用于在过滤器之间传递消息。它的数据保存在每个请求的<code>ThreadLocal</code>中。它</p>
+<p>用于存储请求路由到哪里、错误、<code>HttpServletRequest</code>、<code>HttpServletResponse</code>都存储在</p>
+<p><code>RequestContext</code>中。<code>RequestContext</code>扩展了<code>ConcurrentHashMap</code>，所以，任何数据都可以存储</p>
+<p>在上下文中</p>
+</li>
+</ul>
+<h2 id="springcloud-gateway网关"><a href="#springcloud-gateway网关" class="headerlink" title="springcloud gateway网关"></a>springcloud gateway网关</h2><h1 id=""><a href="#" class="headerlink" title=""></a></h1></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://lyotoc.github.io">Lyoto</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lyotoc.github.io/2022/06/02/springCloud/">https://lyotoc.github.io/2022/06/02/springCloud/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lyotoc.github.io" target="_blank">Lyoto's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF/">后端</a><a class="post-meta__tags" href="/tags/Spring-Cloud/">Spring Cloud</a><a class="post-meta__tags" href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">微服务</a></div><div class="post_share"><div class="social-share" data-image="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/06/02/SpringMVC%E7%9A%84%E9%85%8D%E7%BD%AE/"><img class="prev-cover" src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">SpringMVC的配置</div></div></a></div><div class="next-post pull-right"><a href="/2022/06/02/Docker%E4%B8%ADrun%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/"><img class="next-cover" src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MySql的使用</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/06/02/SSM%E6%95%B4%E5%90%88/" title="SSM整合"><img class="cover" src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-02</div><div class="title">SSM整合</div></div></a></div><div><a href="/2022/06/02/SpringMVC%E5%8E%9F%E7%90%86/" title="SpringMVC原理"><img class="cover" src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-02</div><div class="title">SpringMVC原理</div></div></a></div><div><a href="/2022/06/02/SpringMVC%E6%B3%A8%E8%A7%A3%E5%8F%8A%E5%85%B6%E5%AE%83/" title="SpringMVC注解及其它"><img class="cover" src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-02</div><div class="title">SpringMVC注解及其它</div></div></a></div><div><a href="/2022/06/02/SpringMVC%E7%9A%84%E9%85%8D%E7%BD%AE/" title="SpringMVC的配置"><img class="cover" src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-02</div><div class="title">SpringMVC的配置</div></div></a></div><div><a href="/2022/06/01/%E5%AD%A6%E4%B9%A0redis%E6%80%BB%E7%BB%93/" title="学习redis总结"><img class="cover" src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-01</div><div class="title">学习redis总结</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/-479e804eaf8f8540.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lyoto</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lyotoc"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/Lyotoc" target="_blank" title="Github"><i class="fa-brands fa-github"></i></a><a class="social-icon" href="mailto:supreme00119@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Lyoto's Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-1-SOA%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">1.</span> <span class="toc-text">1.1 SOA与微服务的关系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-2-%E8%BF%9C%E7%A8%8B%E8%B0%83%E7%94%A8%E6%8A%80%E6%9C%AF"><span class="toc-number">2.</span> <span class="toc-text">1.2 远程调用技术</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-3-Spring-Cloud"><span class="toc-number">3.</span> <span class="toc-text">1.3 Spring Cloud</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8CEureka"><span class="toc-number">4.</span> <span class="toc-text">2 服务注册Eureka</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83"><span class="toc-number">4.1.</span> <span class="toc-text">2.1 微服务的注册中心</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-1-%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E7%9A%84%E4%B8%BB%E8%A6%81%E4%BD%9C%E7%94%A8"><span class="toc-number">4.2.</span> <span class="toc-text">2.1.1 注册中心的主要作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-2-%E5%B8%B8%E8%A7%81%E7%9A%84%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83"><span class="toc-number">4.3.</span> <span class="toc-text">2.1.2 常见的注册中心</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Eureka"><span class="toc-number">4.3.1.</span> <span class="toc-text">使用Eureka</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#eureka%E9%9B%86%E7%BE%A4%E3%80%81%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E5%BC%95%E5%85%A5"><span class="toc-number">4.3.2.</span> <span class="toc-text">eureka集群、高可用的引入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98"><span class="toc-number">4.3.3.</span> <span class="toc-text">细节问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%A8%E6%8E%A7%E5%88%B6%E5%8F%B0%E6%98%BE%E7%A4%BA%E6%9C%8D%E5%8A%A1IP"><span class="toc-number">4.3.3.1.</span> <span class="toc-text">在控制台显示服务IP</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#eureka%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%89%94%E9%99%A4%E9%97%AE%E9%A2%98"><span class="toc-number">4.3.3.2.</span> <span class="toc-text">eureka的服务剔除问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#eureka%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6"><span class="toc-number">4.3.3.3.</span> <span class="toc-text">eureka的自我保护机制</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-eureka%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="toc-number">4.4.</span> <span class="toc-text">2.2 eureka源码解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-SpringBoot%E4%B8%AD%E7%9A%84%E8%87%AA%E5%8A%A8%E8%A3%85%E8%BD%BD"><span class="toc-number">4.4.1.</span> <span class="toc-text">2.2.1 SpringBoot中的自动装载</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-ImportSelector"><span class="toc-number">4.4.1.1.</span> <span class="toc-text">(1) ImportSelector</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-EnableEurekaServer"><span class="toc-number">4.4.1.2.</span> <span class="toc-text">(2) EnableEurekaServer</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Ribbon"><span class="toc-number">5.</span> <span class="toc-text">3. 服务调用Ribbon</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-Ribbon%E6%A6%82%E8%BF%B0"><span class="toc-number">5.1.</span> <span class="toc-text">3.1 Ribbon概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-1-%E4%BB%80%E4%B9%88%E6%98%AFRibbon"><span class="toc-number">5.1.1.</span> <span class="toc-text">3.1.1 什么是Ribbon</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-2-Ribbon%E7%9A%84%E4%B8%BB%E8%A6%81%E4%BD%9C%E7%94%A8"><span class="toc-number">5.1.2.</span> <span class="toc-text">3.1.2 Ribbon的主要作用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8"><span class="toc-number">5.1.2.1.</span> <span class="toc-text">(1) 服务调用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="toc-number">5.1.2.2.</span> <span class="toc-text">(2) 负载均衡</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5"><span class="toc-number">5.1.2.3.</span> <span class="toc-text">(3) 负载均衡策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6"><span class="toc-number">5.1.2.4.</span> <span class="toc-text">(4) 重试机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-Ribbon%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="toc-number">5.1.2.5.</span> <span class="toc-text">(5) Ribbon源码解析</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-Consul"><span class="toc-number">6.</span> <span class="toc-text">4.Consul</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-1-consul%E5%92%8Ceureka%E5%8C%BA%E5%88%AB"><span class="toc-number">6.0.1.</span> <span class="toc-text">4.1.1 consul和eureka区别</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">6.0.1.1.</span> <span class="toc-text">(1) 一致性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80%E5%92%8C%E4%BD%BF%E7%94%A8"><span class="toc-number">6.0.1.2.</span> <span class="toc-text">(2) 开发语言和使用</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Feign"><span class="toc-number">7.</span> <span class="toc-text">5.服务调用Feign</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-Feign%E7%AE%80%E4%BB%8B"><span class="toc-number">7.1.</span> <span class="toc-text">5.1 Feign简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E5%9F%BA%E4%BA%8EFeign%E7%9A%84%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8"><span class="toc-number">7.2.</span> <span class="toc-text">5.2 基于Feign的服务调用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%BC%95%E5%85%A5%E4%BE%9D%E8%B5%96"><span class="toc-number">7.2.0.1.</span> <span class="toc-text">(1) 引入依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E9%85%8D%E7%BD%AE%E8%B0%83%E7%94%A8%E6%8E%A5%E5%8F%A3"><span class="toc-number">7.2.0.2.</span> <span class="toc-text">(2) 配置调用接口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%9C%A8%E5%90%AF%E5%8A%A8%E7%B1%BB%E6%BF%80%E6%B4%BBFeign"><span class="toc-number">7.2.0.3.</span> <span class="toc-text">(3) 在启动类激活Feign</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E9%80%9A%E8%BF%87%E8%87%AA%E5%8A%A8%E7%9A%84%E6%8E%A5%E5%8F%A3%E8%B0%83%E7%94%A8%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1"><span class="toc-number">7.2.0.4.</span> <span class="toc-text">(4) 通过自动的接口调用远程服务</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="toc-number">7.3.</span> <span class="toc-text">5.3 负载均衡</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Feign%E9%AB%98%E7%BA%A7"><span class="toc-number">8.</span> <span class="toc-text">6 服务调用Feign高级</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-Feign%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="toc-number">8.1.</span> <span class="toc-text">6.1 Feign的配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-%E8%AF%B7%E6%B1%82%E5%8E%8B%E7%BC%A9"><span class="toc-number">8.2.</span> <span class="toc-text">6.2 请求压缩</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-3-%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB"><span class="toc-number">8.3.</span> <span class="toc-text">6.3 日志级别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-4-Feign%E5%92%8CRibbon%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">8.4.</span> <span class="toc-text">6.4 Feign和Ribbon的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-5-%E7%BB%84%E4%BB%B6%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-number">8.5.</span> <span class="toc-text">6.5 组件的使用方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-5-1-%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83"><span class="toc-number">8.5.1.</span> <span class="toc-text">6.5.1 注册中心</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Eureka"><span class="toc-number">8.5.1.1.</span> <span class="toc-text">(1) Eureka</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-consul"><span class="toc-number">8.5.1.2.</span> <span class="toc-text">(2) consul</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-5-2-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8"><span class="toc-number">8.5.2.</span> <span class="toc-text">6.5.2 服务调用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Ribbon"><span class="toc-number">8.5.2.1.</span> <span class="toc-text">(1) Ribbon</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Feign"><span class="toc-number">8.5.2.2.</span> <span class="toc-text">(2) Feign</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%9A%84%E9%AB%98%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98"><span class="toc-number">8.6.</span> <span class="toc-text">6.1 微服务架构的高并发问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-1-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7Jmeter"><span class="toc-number">8.6.1.</span> <span class="toc-text">6.1.1 性能测试工具Jmeter</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-%E7%B3%BB%E7%BB%9F%E8%B4%9F%E8%BD%BD%E8%BF%87%E9%AB%98%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">8.7.</span> <span class="toc-text">6.2 系统负载过高存在的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-1-%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">8.7.1.</span> <span class="toc-text">6.2.1 问题分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-2-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E5%BD%A2%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%9C%8D%E5%8A%A1%E9%9A%94%E7%A6%BB"><span class="toc-number">8.7.2.</span> <span class="toc-text">6.2.2 线程池的形式实现服务隔离</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%ADHystrix%E5%85%A5%E9%97%A8"><span class="toc-number">9.</span> <span class="toc-text">7.服务熔断Hystrix入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E6%9C%8D%E5%8A%A1%E5%AE%B9%E9%94%99%E7%9A%84%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86"><span class="toc-number">9.1.</span> <span class="toc-text">7.1 服务容错的核心知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-1-%E9%9B%AA%E5%B4%A9%E6%95%88%E5%BA%94"><span class="toc-number">9.1.1.</span> <span class="toc-text">7.1.1 雪崩效应</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BD%91%E5%85%B3"><span class="toc-number">10.</span> <span class="toc-text">网关</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#zuul%E7%BD%91%E5%85%B3"><span class="toc-number">10.1.</span> <span class="toc-text">zuul网关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">10.1.1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%90%AD%E5%BB%BAzuul%E7%BD%91%E5%85%B3%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">10.1.2.</span> <span class="toc-text">搭建zuul网关服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1"><span class="toc-number">10.1.3.</span> <span class="toc-text">路由</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE"><span class="toc-number">10.1.3.1.</span> <span class="toc-text">基础路由配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E5%90%91%E6%9C%8D%E5%8A%A1%E7%9A%84%E8%B7%AF%E7%94%B1"><span class="toc-number">10.1.3.2.</span> <span class="toc-text">面向服务的路由</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-number">10.1.4.</span> <span class="toc-text">过滤器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ZuulFilter"><span class="toc-number">10.1.4.1.</span> <span class="toc-text">ZuulFilter</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E6%BA%90%E7%A0%81"><span class="toc-number">10.1.4.1.1.</span> <span class="toc-text">内部源码</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#springcloud-gateway%E7%BD%91%E5%85%B3"><span class="toc-number">10.2.</span> <span class="toc-text">springcloud gateway网关</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">11.</span> <span class="toc-text"></span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/06/02/git%E7%9A%84%E7%94%A8%E6%B3%95/" title="git的用法"><img src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="git的用法"/></a><div class="content"><a class="title" href="/2022/06/02/git%E7%9A%84%E7%94%A8%E6%B3%95/" title="git的用法">git的用法</a><time datetime="2022-06-02T06:38:21.000Z" title="发表于 2022-06-02 14:38:21">2022-06-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/02/SSM%E6%95%B4%E5%90%88/" title="SSM整合"><img src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SSM整合"/></a><div class="content"><a class="title" href="/2022/06/02/SSM%E6%95%B4%E5%90%88/" title="SSM整合">SSM整合</a><time datetime="2022-06-02T06:30:12.000Z" title="发表于 2022-06-02 14:30:12">2022-06-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/02/SpringMVC%E6%B3%A8%E8%A7%A3%E5%8F%8A%E5%85%B6%E5%AE%83/" title="SpringMVC注解及其它"><img src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringMVC注解及其它"/></a><div class="content"><a class="title" href="/2022/06/02/SpringMVC%E6%B3%A8%E8%A7%A3%E5%8F%8A%E5%85%B6%E5%AE%83/" title="SpringMVC注解及其它">SpringMVC注解及其它</a><time datetime="2022-06-02T06:29:20.000Z" title="发表于 2022-06-02 14:29:20">2022-06-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/02/SpringMVC%E5%8E%9F%E7%90%86/" title="SpringMVC原理"><img src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringMVC原理"/></a><div class="content"><a class="title" href="/2022/06/02/SpringMVC%E5%8E%9F%E7%90%86/" title="SpringMVC原理">SpringMVC原理</a><time datetime="2022-06-02T06:28:03.000Z" title="发表于 2022-06-02 14:28:03">2022-06-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/02/SpringMVC%E7%9A%84%E9%85%8D%E7%BD%AE/" title="SpringMVC的配置"><img src="https://images.pexels.com/photos/11872983/pexels-photo-11872983.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringMVC的配置"/></a><div class="content"><a class="title" href="/2022/06/02/SpringMVC%E7%9A%84%E9%85%8D%E7%BD%AE/" title="SpringMVC的配置">SpringMVC的配置</a><time datetime="2022-06-02T06:26:23.000Z" title="发表于 2022-06-02 14:26:23">2022-06-02</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By Lyoto</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
