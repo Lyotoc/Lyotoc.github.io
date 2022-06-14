@@ -268,9 +268,9 @@
     <category term="技术" scheme="https://lyotoc.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="后端" scheme="https://lyotoc.github.io/tags/%E5%90%8E%E7%AB%AF/"/>
-    
     <category term="SQL" scheme="https://lyotoc.github.io/tags/SQL/"/>
+    
+    <category term="后端" scheme="https://lyotoc.github.io/tags/%E5%90%8E%E7%AB%AF/"/>
     
     <category term="Redis" scheme="https://lyotoc.github.io/tags/Redis/"/>
     
