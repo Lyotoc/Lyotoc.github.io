@@ -151,6 +151,13 @@
   </url>
   
   <url>
+    <loc>https://lyotoc.github.io/tags/SQL/</loc>
+    <lastmod>2022-06-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://lyotoc.github.io/tags/Spring/</loc>
     <lastmod>2022-06-16</lastmod>
     <changefreq>weekly</changefreq>
@@ -158,7 +165,7 @@
   </url>
   
   <url>
-    <loc>https://lyotoc.github.io/tags/SQL/</loc>
+    <loc>https://lyotoc.github.io/tags/k8s/</loc>
     <lastmod>2022-06-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -173,13 +180,6 @@
   
   <url>
     <loc>https://lyotoc.github.io/tags/%E5%B7%A5%E5%85%B7/</loc>
-    <lastmod>2022-06-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://lyotoc.github.io/tags/k8s/</loc>
     <lastmod>2022-06-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
