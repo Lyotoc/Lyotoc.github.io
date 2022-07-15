@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lyotoc.github.io/2022/07/15/Java%E5%9F%BA%E7%A1%80%E5%85%A8%E8%A7%88/</loc>
+    
+    <lastmod>2022-07-15</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://lyotoc.github.io/2022/06/14/JVM%E5%8E%9F%E7%90%86/</loc>
     
     <lastmod>2022-07-15</lastmod>
