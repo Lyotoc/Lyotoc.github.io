@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lyotoc.github.io/2022/07/20/ArrayList%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</loc>
+    
+    <lastmod>2022-07-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://lyotoc.github.io/2022/07/15/Java%E5%9F%BA%E7%A1%80%E5%85%A8%E8%A7%88/</loc>
     
     <lastmod>2022-07-20</lastmod>
@@ -187,14 +196,14 @@
   </url>
   
   <url>
-    <loc>https://lyotoc.github.io/tags/SQL/</loc>
+    <loc>https://lyotoc.github.io/tags/Spring/</loc>
     <lastmod>2022-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://lyotoc.github.io/tags/Spring/</loc>
+    <loc>https://lyotoc.github.io/tags/SQL/</loc>
     <lastmod>2022-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
