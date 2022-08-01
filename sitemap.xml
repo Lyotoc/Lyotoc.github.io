@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lyotoc.github.io/2022/08/01/docker%E9%85%8D%E7%BD%AErabbitmq/</loc>
+    
+    <lastmod>2022-08-01</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://lyotoc.github.io/2022/07/21/HashMap%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/</loc>
     
     <lastmod>2022-07-25</lastmod>
@@ -213,6 +222,13 @@
   
   <url>
     <loc>https://lyotoc.github.io/tags/Spring/</loc>
+    <lastmod>2022-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://lyotoc.github.io/tags/docker/</loc>
     <lastmod>2022-08-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

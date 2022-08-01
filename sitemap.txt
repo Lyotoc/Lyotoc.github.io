@@ -1,3 +1,4 @@
+https://lyotoc.github.io/2022/08/01/docker%E9%85%8D%E7%BD%AErabbitmq/
 https://lyotoc.github.io/2022/07/21/HashMap%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/
 https://lyotoc.github.io/2022/07/20/ArrayList%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/
 https://lyotoc.github.io/2022/07/15/Java%E5%9F%BA%E7%A1%80%E5%85%A8%E8%A7%88/
@@ -23,6 +24,7 @@ https://lyotoc.github.io/tags/Docker/
 https://lyotoc.github.io/tags/%E5%90%8E%E7%AB%AF/
 https://lyotoc.github.io/tags/SQL/
 https://lyotoc.github.io/tags/Spring/
+https://lyotoc.github.io/tags/docker/
 https://lyotoc.github.io/tags/git/
 https://lyotoc.github.io/tags/%E5%B7%A5%E5%85%B7/
 https://lyotoc.github.io/tags/%E7%AE%97%E6%B3%95/
