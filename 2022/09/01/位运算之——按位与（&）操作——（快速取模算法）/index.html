@@ -1,0 +1,263 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>位运算之——按位与（&amp;）操作——（快速取模算法） | Lyoto's Blog</title><meta name="keywords" content="技术"><meta name="author" content="Lyoto"><meta name="copyright" content="Lyoto"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="位运算之——按位与（&amp;）操作——（快速取模算法）由于位运算直接对内存数据进行操作，不需要转成十进制，因此处理速度非常快。 按位与（Bitwise AND），运算符号为&amp; a&amp;b 的操作的结果：a、b中对应位同时为1，则对应结果位也为1、 例如： 10010001101000101011001111000 &amp; 111111100000000 —————————————">
+<meta property="og:type" content="article">
+<meta property="og:title" content="位运算之——按位与（&amp;）操作——（快速取模算法）">
+<meta property="og:url" content="https://lyotoc.github.io/2022/09/01/%E4%BD%8D%E8%BF%90%E7%AE%97%E4%B9%8B%E2%80%94%E2%80%94%E6%8C%89%E4%BD%8D%E4%B8%8E%EF%BC%88&%EF%BC%89%E6%93%8D%E4%BD%9C%E2%80%94%E2%80%94%EF%BC%88%E5%BF%AB%E9%80%9F%E5%8F%96%E6%A8%A1%E7%AE%97%E6%B3%95%EF%BC%89/index.html">
+<meta property="og:site_name" content="Lyoto&#39;s Blog">
+<meta property="og:description" content="位运算之——按位与（&amp;）操作——（快速取模算法）由于位运算直接对内存数据进行操作，不需要转成十进制，因此处理速度非常快。 按位与（Bitwise AND），运算符号为&amp; a&amp;b 的操作的结果：a、b中对应位同时为1，则对应结果位也为1、 例如： 10010001101000101011001111000 &amp; 111111100000000 —————————————">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/footprints_hires.jpg">
+<meta property="article:published_time" content="2022-09-01T08:09:06.000Z">
+<meta property="article:modified_time" content="2022-09-01T10:35:07.351Z">
+<meta property="article:author" content="Lyoto">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/footprints_hires.jpg"><link rel="shortcut icon" href="/img/laptop.ico"><link rel="canonical" href="https://lyotoc.github.io/2022/09/01/%E4%BD%8D%E8%BF%90%E7%AE%97%E4%B9%8B%E2%80%94%E2%80%94%E6%8C%89%E4%BD%8D%E4%B8%8E%EF%BC%88&amp;%EF%BC%89%E6%93%8D%E4%BD%9C%E2%80%94%E2%80%94%EF%BC%88%E5%BF%AB%E9%80%9F%E5%8F%96%E6%A8%A1%E7%AE%97%E6%B3%95%EF%BC%89/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '位运算之——按位与（&）操作——（快速取模算法）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-01 18:35:07'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"><link rel="alternate" href="/atom.xml" title="Lyoto's Blog" type="application/atom+xml">
+</head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/-479e804eaf8f8540.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">27</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 类别</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 分组</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/footprints_hires.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Lyoto's Blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 类别</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 分组</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">位运算之——按位与（&amp;）操作——（快速取模算法）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-09-01T08:09:06.000Z" title="发表于 2022-09-01 16:09:06">2022-09-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-01T10:35:07.351Z" title="更新于 2022-09-01 18:35:07">2022-09-01</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="位运算之——按位与（&amp;）操作——（快速取模算法）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="位运算之——按位与（-amp-）操作——（快速取模算法）"><a href="#位运算之——按位与（-amp-）操作——（快速取模算法）" class="headerlink" title="位运算之——按位与（&amp;）操作——（快速取模算法）"></a>位运算之——按位与（&amp;）操作——（快速取模算法）</h1><p>由于位运算直接对内存数据进行操作，不需要转成十进制，因此处理速度非常快。</p>
+<p>按位与（Bitwise AND），运算符号为&amp;</p>
+<p>a&amp;b 的操作的结果：a、b中对应位同时为1，则对应结果位也为1、</p>
+<p>例如：</p>
+<p><strong>10010001101000101011001111000</strong></p>
+<p><strong>&amp; 111111100000000</strong></p>
+<p><strong>———————————————</strong></p>
+<p><strong>10101100000000</strong></p>
+<p><strong>对10101100000000<strong><strong>进行右移8</strong></strong>位得到的是101011<strong><strong>，这就得到了a</strong></strong>的8~15****位的掩码了。</strong>那么根据这个启示，判断一个整数是否是处于 0-65535 之间（常用的越界判断）：</p>
+<p>用一般的 (a &gt;&#x3D; 0) &amp;&amp; (a &lt;&#x3D; 65535) 可能要两次判断。</p>
+<p>改用位运算只要一次：</p>
+<p>a &amp; ~((1&lt;&lt; 16)-1)</p>
+<p>后面的常数是编译时就算好了的。其实只要算一次逻辑与就行了。</p>
+<p><strong>常用技巧：</strong></p>
+<p>1、 用于整数的奇偶性判断</p>
+<p>一个整数a, a &amp; 1 这个表达式可以用来判断a的奇偶性。二进制的末位为0表示偶数，最末位为1表示奇数。使用a%2来判断奇偶性和a &amp; 1是一样的作用，但是a &amp; 1要快好多。</p>
+<p>2、 判断n是否是2的正整数冪</p>
+<p><strong>(!(n&amp;(n-1)) )&amp;&amp; n</strong></p>
+<p>举个例子：</p>
+<p>如果n &#x3D; 16 &#x3D; 10000， n-1 &#x3D; 1111</p>
+<p>那么：</p>
+<p><strong>10000</strong></p>
+<p><strong>&amp; 1111</strong></p>
+<p><strong>———-</strong></p>
+<p>​      <strong>0</strong></p>
+<p>再举一个例子：如果n &#x3D; 256 &#x3D; 100000000， n-1 &#x3D; 11111111</p>
+<p>那么：</p>
+<p><strong>100000000</strong></p>
+<p><strong>&amp;11111111</strong></p>
+<p><strong>————–</strong></p>
+<p><strong>0</strong></p>
+<p>好！看完上面的两个小例子，相信大家都有一个感性的认识。从理论上讲，如果一个数a他是2的正整数幂，那么a 的二进制形式必定为1000…..（后面有0个或者多个0），那么结论就很显然了。</p>
+<p>3、 统计n中1的个数</p>
+<p>朴素的统计办法是：先判断n的奇偶性，为奇数时计数器增加1，然后将n右移一位，重复上面步骤，直到移位完毕。</p>
+<p>朴素的统计办法是比较简单的，那么我们来看看比较高级的办法。</p>
+<p>举例说明，考虑2位整数 n&#x3D;11，里边有2个1，先提取里边的偶数位10，奇数位01，把偶数位右移1位，然后与奇数位相加，因为每对奇偶位相加的和不会超过“两位”，所以结果中每两位保存着数n中1的个数；相应的如果n是四位整数 n&#x3D;0111，先以“一位”为单位做奇偶位提取，然后偶数位移位（右移1位），相加；再以“两位”为单位做奇偶提取，偶数位移位（这时就需要移2位），相加，因为此时没对奇偶位的和不会超过“四位”，所以结果中保存着n中1的个数，依次类推可以得出更多位n的算法。整个思想类似分治法。<br>在这里就顺便说一下常用的二进制数：</p>
+<p>0xAAAAAAAA&#x3D;10101010101010101010101010101010</p>
+<p>0x55555555 &#x3D; 1010101010101010101010101010101（奇数位为1，以1位为单位提取奇偶位）</p>
+<p>0xCCCCCCCC &#x3D; 11001100110011001100110011001100</p>
+<p>0x33333333 &#x3D; 110011001100110011001100110011（以“2位”为单位提取奇偶位）</p>
+<p>0xF0F0F0F0 &#x3D; 11110000111100001111000011110000</p>
+<p>0x0F0F0F0F &#x3D; 1111000011110000111100001111（以“8位”为单位提取奇偶位）</p>
+<p>0xFFFF0000 &#x3D;11111111111111110000000000000000</p>
+<p>0x0000FFFF &#x3D; 1111111111111111（以“16位”为单位提取奇偶位）</p>
+<p>例如：32位无符号数的1的个数可以这样数：</p>
+<p>int count_one(unsigned long n)<br>{<br>&#x2F;&#x2F;0xAAAAAAAA，0x55555555分别是以“1位”为单位提取奇偶位<br>n &#x3D; ((n &amp; 0xAAAAAAAA) &gt;&gt; 1) + (n &amp; 0x55555555);</p>
+<p>&#x2F;&#x2F;0xCCCCCCCC，0x33333333分别是以“2位”为单位提取奇偶位<br>n &#x3D; ((n &amp; 0xCCCCCCCC) &gt;&gt; 2) + (n &amp; 0x33333333);</p>
+<p>&#x2F;&#x2F;0xF0F0F0F0，0x0F0F0F0F分别是以“4位”为单位提取奇偶位<br>n &#x3D; ((n &amp; 0xF0F0F0F0) &gt;&gt; 4) + (n &amp; 0x0F0F0F0F);</p>
+<p>&#x2F;&#x2F;0xFF00FF00，0x00FF00FF分别是以“8位”为单位提取奇偶位<br>n &#x3D; ((n &amp; 0xFF00FF00) &gt;&gt; 8) + (n &amp; 0x00FF00FF);</p>
+<p>&#x2F;&#x2F;0xFFFF0000，0x0000FFFF分别是以“16位”为单位提取奇偶位<br>n &#x3D; ((n &amp; 0xFFFF0000) &gt;&gt; 16) + (n &amp; 0x0000FFFF);</p>
+<p>return n;<br>}</p>
+<p>举个例子吧，比如说我的生日是农历2月11，就用211吧，转成二进制：</p>
+<p>n &#x3D; 11010011</p>
+<p>计算n &#x3D; ((n &amp; 0xAAAAAAAA) &gt;&gt; 1) + (n &amp; 0x55555555);</p>
+<p>得到 n &#x3D; 10010010</p>
+<p>计算n &#x3D; ((n &amp; 0xCCCCCCCC) &gt;&gt; 2) + (n &amp; 0x33333333);</p>
+<p>得到 n &#x3D; 00110010</p>
+<p>计算n &#x3D; ((n &amp; 0xF0F0F0F0) &gt;&gt; 4) + (n &amp; 0x0F0F0F0F);</p>
+<p>得到 n &#x3D; 00000101 —————–à无法再分了，那么5就是答案了。</p>
+<p>4、对于正整数的模运算（注意，负数不能这么算）</p>
+<p>先说下比较简单的：</p>
+<p>乘除法是很消耗时间的，只要对数左移一位就是乘以2，右移一位就是除以2，传说用位运算效率提高了60%。</p>
+<p>乘2^k众所周知： n&lt;&lt;k。所以你以后还会傻傻地去敲2566*4的结果10264吗？直接2566&lt;&lt;4就搞定了，又快又准确。</p>
+<p>除2^k众所周知： n&gt;&gt;k。</p>
+<p>那么 mod 2^k 呢？（对2的倍数取模）</p>
+<p><strong>n&amp;((1&lt;&lt;k)-1)</strong></p>
+<p>用通俗的言语来描述就是,对2的倍数取模，只要将数与2的倍数-1做按位与运算即可。</p>
+<p>好！方便理解就举个例子吧。</p>
+<p>思考：如果结果是要求模2^k时，我们真的需要每次都取模吗？</p>
+<p>在此很容易让人想到快速幂取模法。</p>
+<p><strong>快速幂取模算法</strong></p>
+<p>经常做题目的时候会遇到要计算 a^b mod c 的情况，这时候，一个不小心就TLE了。那么如何解决这个问题呢？位运算来帮你吧。</p>
+<p>首先介绍一下秦九韶算法：(数值分析讲得很清楚)</p>
+<p>把一个n次多项式f(x) &#x3D; a[n]x^n+a[n-1]x^(n-1)+……+a[1]x+a[0]改写成如下形式：</p>
+<p>　　f(x) &#x3D; a[n]x^n+a[n-1]x^(n-1))+……+a[1]x+a[0]</p>
+<p>　　&#x3D; (a[n]x^(n-1)+a[n-1]x^(n-2)+……+a[1])x+a[0]</p>
+<p>　　&#x3D; ((a[n]x^(n-2)+a[n-1]x^(n-3)+……+a[2])x+a[1])x+a[0]</p>
+<p>　　&#x3D;. …..</p>
+<p>　　&#x3D; (……((a[n]x+a[n-1])x+a[n-2])x+……+a[1])x+a[0].</p>
+<p>　　求多项式的值时，首先计算最内层括号内一次多项式的值，即</p>
+<p>　　v[1]&#x3D;a[n]x+a[n-1]</p>
+<p>　　然后由内向外逐层计算一次多项式的值，即</p>
+<p>　　v[2]&#x3D;v[1]x+a[n-2]</p>
+<p>　　v[3]&#x3D;v[2]x+a[n-3]</p>
+<p>　　……</p>
+<p>　　v[n]&#x3D;v[n-1]x+a[0]</p>
+<p>这样，求n次多项式f(x)的值就转化为求n个一次多项式的值。</p>
+<p>好！有了前面的基础知识，我们开始解决问题吧</p>
+<p>由(a ×b) mod c&#x3D;( (a mod c) × b) mod c.</p>
+<p>我们可以将 b先表示成就：</p>
+<p>b &#x3D; a[t] × 2^t + a[t-1]× 2^(t-1) + …… + a[0] × 2^0. (a[i]&#x3D;[0,1]).</p>
+<p>这样我们由 a^b mod c &#x3D; (a^(a[t] × 2^t + a[t-1]× 2^（t-1） + …a[0] × 2^0) mod c.</p>
+<p>然而我们求 a^( 2^(i+1) ) mod c&#x3D;( (a^(2^i)) mod c)^2 mod c .求得。</p>
+<p>具体实现如下：</p>
+<p>使用秦九韶算法思想进行快速幂模算法，简洁漂亮</p>
+<p>&#x2F;&#x2F; 快速计算 (a ^ p) % m 的值<br>__int64 FastM(__int64 a, __int64 p, __int64 m)<br>{<br>if (p &#x3D;&#x3D; 0) return 1;<br>__int64 r &#x3D; a % m;<br>__int64 k &#x3D; 1;<br>while (p &gt; 1)<br>{<br>if ((p &amp; 1)!&#x3D;0)<br>{<br>k &#x3D; (k * r) % m;<br>}<br>r &#x3D; (r * r) % m;<br>p &gt;&gt;&#x3D; 1;<br>}<br>return (r * k) % m;<br>}</p>
+<p><a target="_blank" rel="noopener" href="http://acm.pku.edu.cn/JudgeOnline/problem?id=3070">http://acm.pku.edu.cn/JudgeOnline/problem?id=3070</a></p>
+<p>5、计算掩码</p>
+<p>比如一个截取低6位的掩码：0×3F<br>用位运算这么表示：(1&lt;&lt; 6) - 1<br>这样也非常好读取掩码，因为掩码的位数直接体现在表达式里。</p>
+<p>按位或运算很简单，只要a和b中相应位出现1，那么a|b的结果相应位也为1。就不多说了。</p>
+<p>6、子集</p>
+<p>　　枚举出一个集合的子集。设原集合为mask，则下面的代码就可以列出它的所有子集：</p>
+<script type="text&#x2F;javascript" src="https://unpkg.com/kity@2.0.4/dist/kity.min.js"></script><script type="text&#x2F;javascript" src="https://unpkg.com/kityminder-core@1.4.50/dist/kityminder.core.min.js"></script><script defer="true" type="text&#x2F;javascript" src="https://unpkg.com/hexo-simple-mindmap@0.8.0/dist/mindmap.min.js"></script><link rel="stylesheet" type="text&#x2F;css" href="https://unpkg.com/hexo-simple-mindmap@0.8.0/dist/mindmap.min.css"></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://lyotoc.github.io">Lyoto</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lyotoc.github.io/2022/09/01/%E4%BD%8D%E8%BF%90%E7%AE%97%E4%B9%8B%E2%80%94%E2%80%94%E6%8C%89%E4%BD%8D%E4%B8%8E%EF%BC%88&amp;%EF%BC%89%E6%93%8D%E4%BD%9C%E2%80%94%E2%80%94%EF%BC%88%E5%BF%AB%E9%80%9F%E5%8F%96%E6%A8%A1%E7%AE%97%E6%B3%95%EF%BC%89/">https://lyotoc.github.io/2022/09/01/%E4%BD%8D%E8%BF%90%E7%AE%97%E4%B9%8B%E2%80%94%E2%80%94%E6%8C%89%E4%BD%8D%E4%B8%8E%EF%BC%88&amp;%EF%BC%89%E6%93%8D%E4%BD%9C%E2%80%94%E2%80%94%EF%BC%88%E5%BF%AB%E9%80%9F%E5%8F%96%E6%A8%A1%E7%AE%97%E6%B3%95%EF%BC%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lyotoc.github.io" target="_blank">Lyoto's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8A%80%E6%9C%AF/">技术</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/footprints_hires.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/09/01/%E5%8F%B2%E4%B8%8A%E6%9C%80%E5%85%A8HashMap%E9%9D%A2%E8%AF%95%E9%A2%98%E6%B1%87%E6%80%BB/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001356880_e85308b131303c80fd6122d3151dbdc2.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">史上最全HashMap面试题汇总</div></div></a></div><div class="next-post pull-right"><a href="/2022/08/26/%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001633216_1_7f40cef0a89b63c8352d4ff9334527d0.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">线程池</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/07/29/Spring%E6%9D%82%E7%83%A9/" title="Spring杂烩"><img class="cover" src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001633216_1_7f40cef0a89b63c8352d4ff9334527d0.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-29</div><div class="title">Spring杂烩</div></div></a></div><div><a href="/2022/09/01/%E5%8F%B2%E4%B8%8A%E6%9C%80%E5%85%A8HashMap%E9%9D%A2%E8%AF%95%E9%A2%98%E6%B1%87%E6%80%BB/" title="史上最全HashMap面试题汇总"><img class="cover" src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001356880_e85308b131303c80fd6122d3151dbdc2.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-09-01</div><div class="title">史上最全HashMap面试题汇总</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/-479e804eaf8f8540.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lyoto</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">27</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lyotoc"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/Lyotoc" target="_blank" title="Github"><i class="fa-brands fa-github"></i></a><a class="social-icon" href="mailto:supreme00119@163.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Lyoto's Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%8D%E8%BF%90%E7%AE%97%E4%B9%8B%E2%80%94%E2%80%94%E6%8C%89%E4%BD%8D%E4%B8%8E%EF%BC%88-amp-%EF%BC%89%E6%93%8D%E4%BD%9C%E2%80%94%E2%80%94%EF%BC%88%E5%BF%AB%E9%80%9F%E5%8F%96%E6%A8%A1%E7%AE%97%E6%B3%95%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">位运算之——按位与（&amp;）操作——（快速取模算法）</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/09/01/%E5%8F%B2%E4%B8%8A%E6%9C%80%E5%85%A8HashMap%E9%9D%A2%E8%AF%95%E9%A2%98%E6%B1%87%E6%80%BB/" title="史上最全HashMap面试题汇总"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001356880_e85308b131303c80fd6122d3151dbdc2.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="史上最全HashMap面试题汇总"/></a><div class="content"><a class="title" href="/2022/09/01/%E5%8F%B2%E4%B8%8A%E6%9C%80%E5%85%A8HashMap%E9%9D%A2%E8%AF%95%E9%A2%98%E6%B1%87%E6%80%BB/" title="史上最全HashMap面试题汇总">史上最全HashMap面试题汇总</a><time datetime="2022-09-01T10:34:17.000Z" title="发表于 2022-09-01 18:34:17">2022-09-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/01/%E4%BD%8D%E8%BF%90%E7%AE%97%E4%B9%8B%E2%80%94%E2%80%94%E6%8C%89%E4%BD%8D%E4%B8%8E%EF%BC%88&amp;%EF%BC%89%E6%93%8D%E4%BD%9C%E2%80%94%E2%80%94%EF%BC%88%E5%BF%AB%E9%80%9F%E5%8F%96%E6%A8%A1%E7%AE%97%E6%B3%95%EF%BC%89/" title="位运算之——按位与（&amp;）操作——（快速取模算法）"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/footprints_hires.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="位运算之——按位与（&amp;）操作——（快速取模算法）"/></a><div class="content"><a class="title" href="/2022/09/01/%E4%BD%8D%E8%BF%90%E7%AE%97%E4%B9%8B%E2%80%94%E2%80%94%E6%8C%89%E4%BD%8D%E4%B8%8E%EF%BC%88&amp;%EF%BC%89%E6%93%8D%E4%BD%9C%E2%80%94%E2%80%94%EF%BC%88%E5%BF%AB%E9%80%9F%E5%8F%96%E6%A8%A1%E7%AE%97%E6%B3%95%EF%BC%89/" title="位运算之——按位与（&amp;）操作——（快速取模算法）">位运算之——按位与（&amp;）操作——（快速取模算法）</a><time datetime="2022-09-01T08:09:06.000Z" title="发表于 2022-09-01 16:09:06">2022-09-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/08/26/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" title="线程池"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001633216_1_7f40cef0a89b63c8352d4ff9334527d0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="线程池"/></a><div class="content"><a class="title" href="/2022/08/26/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" title="线程池">线程池</a><time datetime="2022-08-26T10:53:45.000Z" title="发表于 2022-08-26 18:53:45">2022-08-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/08/26/AQS/" title="AQS"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001312704_1_d51e812760ca960a68f48e0f9b6f44bc.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AQS"/></a><div class="content"><a class="title" href="/2022/08/26/AQS/" title="AQS">AQS</a><time datetime="2022-08-26T10:51:02.000Z" title="发表于 2022-08-26 18:51:02">2022-08-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/08/11/shiro%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81/" title="shiro权限认证"><img src="https://cdn.jsdelivr.net/gh/Lyotoc/Picphoto@main/img/2001356880_e85308b131303c80fd6122d3151dbdc2.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="shiro权限认证"/></a><div class="content"><a class="title" href="/2022/08/11/shiro%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81/" title="shiro权限认证">shiro权限认证</a><time datetime="2022-08-11T07:31:37.000Z" title="发表于 2022-08-11 15:31:37">2022-08-11</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By Lyoto</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
