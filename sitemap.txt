@@ -1,3 +1,4 @@
+https://lyotoc.github.io/2022/09/01/%E8%85%BE%E8%AE%AF%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%AC%94%E8%AF%95%E9%A2%98/
 https://lyotoc.github.io/2022/07/29/Spring%E6%9D%82%E7%83%A9/
 https://lyotoc.github.io/2022/09/18/Redis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/
 https://lyotoc.github.io/2022/08/01/Docker%E5%AE%B9%E5%99%A8%E7%9B%B8%E5%85%B3/
@@ -48,6 +49,7 @@ https://lyotoc.github.io/tags/HashMap/
 https://lyotoc.github.io/tags/JDBC/
 https://lyotoc.github.io/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/
 https://lyotoc.github.io/tags/JUC/
+https://lyotoc.github.io/tags/%E7%AC%94%E8%AF%95/
 https://lyotoc.github.io/categories/%E6%8A%80%E6%9C%AF/
 https://lyotoc.github.io/categories/%E5%90%8E%E7%AB%AF/
 https://lyotoc.github.io/categories/%E9%9D%A2%E8%AF%95/
