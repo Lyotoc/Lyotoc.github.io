@@ -1,0 +1,83 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>csv-visible</title><style>*{box-sizing:border-box}.chart{width:100vw;height:80vh}#drop-area{width:95vw;height:15vh;border:2px dashed #ccc;border-radius:10px;text-align:center;line-height:15vh;font-size:18px;margin:0 auto;padding:0 20px}#fileInput{opacity:0;width:100vw;height:15vh;position:absolute;left:0}</style></head><body><div class="chart"></div><div id="drop-area">将文件拖放到这里或者点击选择文件<input type="file" id="fileInput"></div><script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery"></script><script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script><script>const $myChart = echarts.init(document.querySelector(".chart"));
+
+        (async () => {
+            const dropArea = document.getElementById('drop-area');
+            const fileInput = document.getElementById('fileInput');
+
+            // 阻止默认的拖拽行为
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+            // 当拖拽进入区域时改变样式
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, () => {
+                    dropArea.style.backgroundColor = '#f2f2f2';
+                }, false);
+            });
+            // 当拖拽离开区域时恢复样式
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, () => {
+                    dropArea.style.backgroundColor = '';
+                }, false);
+            });
+            // 处理文件放置
+            dropArea.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const fileContent = await readFile(files[0])
+                    document.title = files[0].name
+                    $myChart.setOption(buildOption(files[0].name, fileContent))
+                }
+            }, false);
+
+            // 处理文件选择
+            fileInput.addEventListener('change', async (e) => {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    const fileContent = await readFile(files[0])
+                    document.title = files[0].name
+                    $myChart.setOption(buildOption(files[0].name, fileContent))
+                }
+            }, false);
+        })()
+
+        function buildOption(name, content) {
+            // 将CSV数据转换为二维数组
+            let rows = content.trim().split('\n').map(row => row.split(','));
+            // 获取列名（时间戳和数据）
+            let headers = rows[0].slice(1); // 去除时间戳列
+            // 将数据分为时间戳和数据列
+            let timeData = rows.slice(1).map(row => row[0]);
+            let seriesData = headers.map((_, idx) => ({
+                name: headers[idx],
+                type: 'line',
+                data: rows.slice(1).map(row => parseFloat(row[idx + 1]))
+            }));
+            // ECharts 配置项
+            return {
+                title: { text: name },
+                tooltip: { trigger: 'axis' },
+                legend: { data: headers },
+                dataZoom: [{ type: 'inside' }],
+                xAxis: { data: timeData, boundaryGap: false },
+                yAxis: {},
+                series: seriesData,
+                grid: { left: '5%', right: '5%', top: '5%', bottom: '5%' },
+                toolbox: { feature: { saveAsImage: {}, dataView: {}, dataZoom: {} } }
+            }
+        }
+
+        function readFile(selectedFile) {
+            return new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const fileContent = event.target.result;
+                    resolve(fileContent)
+                };
+                reader.readAsText(selectedFile)
+            })
+        }</script></body></html>
