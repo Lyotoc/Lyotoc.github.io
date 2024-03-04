@@ -1,9 +1,81 @@
-<mxfile host="app.diagrams.net" modified="2024-03-04T06:08:51.535Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0" version="24.0.1" etag="0l96MzYkwJcPYBE96zH7" type="github">
+<mxfile host="app.diagrams.net" modified="2024-03-04T06:46:10.820Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0" etag="lKsrn12-LDBRBvP3MKNd" version="24.0.1" type="github">
   <diagram name="第 1 页" id="OXM_Ob7Z5P48ye6awSiR">
-    <mxGraphModel>
+    <mxGraphModel dx="2316" dy="1189" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="-oPXiXe47jti-2kongPC-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-1" target="-oPXiXe47jti-2kongPC-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-1" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_2;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="90" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-2" target="-oPXiXe47jti-2kongPC-7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="405" y="478" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-2" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;根据settings.historySetting.filterType选择过滤规则，并使用相应规则判断是否命中settings.historySetting.filters&lt;/span&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;strokeWidth=2;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;align=left;spacingLeft=2;spacingRight=0;" vertex="1" parent="1">
+          <mxGeometry x="290" y="250" width="230" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-4" value="对filterType的解释：&lt;div&gt;为0，不作过滤 则命中&lt;/div&gt;&lt;div&gt;为1，filters中有任意参数被上报prams命中&lt;/div&gt;&lt;div&gt;为2，params中有参数不包含在filters则命中&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_1;align=left;pointerEvents=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="550" y="240" width="50" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-9" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-7" target="-oPXiXe47jti-2kongPC-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-7" target="-oPXiXe47jti-2kongPC-24">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1340" y="1250" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1340" y="505" />
+              <mxPoint x="1340" y="1405" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-7" value="是否已经记录过历史记录" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="307.5" y="440" width="195" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-8" target="-oPXiXe47jti-2kongPC-12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="405" y="840.0000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-8" value="根据业务处理是否需要保存历史记录" style="whiteSpace=wrap;html=1;strokeWidth=2;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="307.5" y="685" width="195" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-12" target="-oPXiXe47jti-2kongPC-19">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="860" y="960" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-20" value="是" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" connectable="0" parent="-oPXiXe47jti-2kongPC-18">
+          <mxGeometry x="0.09" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-12" target="-oPXiXe47jti-2kongPC-24">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="405" y="1200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-12" value="historySettings.excludeFilters是否包含所有上报params内参数" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="165" y="860" width="480" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="-oPXiXe47jti-2kongPC-19" target="-oPXiXe47jti-2kongPC-24">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1020" y="1240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-19" value="根据historySettings.type确定记录操作历史的规则" style="whiteSpace=wrap;html=1;strokeWidth=2;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="910" y="917.5" width="195" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-21" value="&lt;p style=&quot;&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); text-wrap: wrap;&quot;&gt;historySettings.type的解释：&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;border-color: var(--border-color); text-wrap: wrap;&quot;&gt;&amp;nbsp;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;为1，上报参数与现有参数状态有变化才记录&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;border-color: var(--border-color); text-wrap: wrap;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;为2，直接记录&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;border-color: var(--border-color); text-wrap: wrap;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;为3，满足historySettings.saveConditions 才记录&lt;/span&gt;&lt;/p&gt;&lt;div style=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); text-wrap: wrap;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_1;align=left;pointerEvents=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="1119" y="855" width="80" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="-oPXiXe47jti-2kongPC-24" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_2;whiteSpace=wrap;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="1370" width="70" height="70" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
