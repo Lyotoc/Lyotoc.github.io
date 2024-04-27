@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body style="height: 100%; margin: 0">
+    <div id="container" style="height: 100%"></div>
+    <input type="file" id="jsonFile" accept=".json" style="position: absolute; top: 10px; left: 10px; z-index: 1000;"
+        onchange="parseFile(this)">
+    <button id="selectedMode" onclick="selectedAll(this)"
+        style="position: absolute; left: 20cm; top: 10px;z-index: 1000;">全选</button>
+
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('container'));
+
+        var opstion_;
+        // 处理文件上传并解析JSON
+        function parseFile(obj) {
+            var file = obj.files[0];
+            if (!file) {
+                return;
+            }
+            console.log(111111);
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var data = JSON.parse(e.target.result);
+                var fileName = file.name;
+                data.absent = processAbsent(data.absent);
+
+                // 转换数据格式为ECharts需要的格式
+                var legendData = [...Object.keys(data.exist), ...Object.keys(data.absent)];
+
+                var seriesData = [...formatterData(data.exist), ...formatterData(data.absent)];
+
+                console.log("ers", seriesData);
+
+                // 指定图表的配置项和数据
+                var option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    title: {
+                        text: fileName.substring(0, fileName.lastIndexOf(".")),
+                        left: 'center'
+                    },
+                    tooltip: {},
+                    legend: {
+                        data: legendData,
+                        top: '10%',
+                        selectedMode: 'single'
+                    },
+                    dataZoom: [
+                        {   // 这个dataZoom组件，默认控制x轴。
+                            type: 'slider', // 这个 dataZoom 组件是 slider 型 dataZoom 组件
+                            start: 0,      // 左边在 10% 的位置。
+                            end: 100         // 右边在 60% 的位置。
+                        },
+                        {
+                            type: 'inside', // 缩放类型为内缩
+                            start: 0,      // 缩放开始位置
+                            end: 100       // 缩放结束位置
+                        }
+                    ],
+                    xAxis: [
+                        {
+                            type: 'value',
+                            splitLine: {
+                                show: false
+                            },
+                            //横坐标的负半轴的  "坐标轴" 上显示是正数
+                            axisLabel: {
+                                show: true,//不显示坐标轴的数字
+                                formatter: function (value) {
+                                    if (value < 0) {
+                                        return -value;
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    yAxis:
+                    {
+                        show: true,//纵坐标显示
+                        type: 'category',
+                        position: 'left',//纵向坐标显示位置 可选为：left | right
+                        axisTick: { show: false },
+                        splitArea: { show: true },
+                        splitLine: {
+                            show: true//网格线不显示
+                        },
+                        //横坐标的负半轴的  "坐标轴" 上显示是正数
+                        axisLabel: {
+                            show: true,//不显示坐标轴的数字
+                            formatter: function (value) {
+                                if (value < 0) {
+                                    return -value;
+                                }
+                            }
+                        },
+                        data: []
+
+                    },
+                    series: seriesData
+                };
+
+                opstion_ = option;
+
+
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+
+                // 处理图例点击事件
+                // myChart.on('legendselectchanged', (params) => {
+                //     var selected = params.selected;
+                //     var series = option.series;
+                //     for (var i = 0; i < series.length; i++) {
+                //         series[i].data = series[i].data.map((item) => {
+                //             let v;
+                //             if (!selected[series[i].name]) {
+                //                 v = 0;
+                //             } else {
+
+                //                 if (Object.keys(data.absent).includes(series[i].name) && data.absent[series[i].name][item.name]) {
+                //                     v = data.absent[series[i].name][item.name];
+                //                 } else {
+                //                     v = data.exist[series[i].name][item.name];
+                //                 }
+                //             }
+
+
+                //             console.log(v);
+                //             return {
+                //                 value: v,
+                //                 name: item.name
+                //             };
+                //         });
+                //     }
+
+                //     console.log(111, params);
+
+                //     myChart.setOption(option);
+                // });
+            };
+            reader.readAsText(file);
+
+            function formatterData(data) {
+                return Object.keys(data).map(function (key) {
+                    return {
+                        name: key,
+                        type: 'bar',
+                        data: Object.keys(data[key]).map(function (version) {
+                            return { value: data[key][version], name: version };
+                        }),
+                        label: {
+                            normal: {
+                                show: true,
+                                /*
+                                *处理横坐标负半轴这边的  "柱状"  显示的数
+                                *后台传过来是负数，显示时是正数
+                                 */
+                                formatter: function ({ data }) {
+                                    let v_data = data;
+                                    // console.log(v_data);
+                                    // console.log(v_data.value < 0);
+                                    if (v_data.value < 0) {
+                                        return -v_data.value;
+                                    } else {
+                                        return v_data.value;
+                                    }
+                                },
+                            }
+                        },
+
+                    };
+                });
+            }
+
+            function processAbsent(obj) {
+                Object.keys(obj).forEach(key => {
+                    // console.log(key);
+                    Object.keys(obj[key]).forEach(version => {
+                        // console.log(obj[key][version]);
+                        obj[key][version] = -(obj[key][version]);
+                    })
+                })
+                console.log(obj);
+                return obj;
+            }
+        }
+        let selectedAll_ = false;
+        let selected;
+        function selectedAll(obj) {
+            selectedAll_ = !selectedAll_;
+            console.log(opstion_.legend.selectedMode);
+            opstion_.legend.selectedMode = selectedAll_ ? 'multiple' : 'single'
+            if (opstion_.legend.selectedMode === "multiple") {
+                obj.innerText = "取消全选"
+                if (!selected) {
+                    selected = opstion_.legend.selected;
+                }
+                opstion_.legend.selected = opstion_.legend.data.reduce(function (obj, item) {
+                    obj[item] = true;
+                    return obj;
+                }, {})
+            } else {
+                obj.innerText = "全选"
+                opstion_.legend.selected = opstion_.legend.data.reduce(function (obj, item) {
+                    obj[item] = false;
+                    return obj;
+                }, {});
+            }
+            myChart.setOption(opstion_);
+            console.log(opstion_.legend.selectedMode);
+        }
+    </script>
+</body>
+
+</html>
