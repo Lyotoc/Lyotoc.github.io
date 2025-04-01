@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Time & ID Calculator</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
         <h1>Time & ID Calculator</h1>
@@ -13,42 +15,44 @@
             <div class="forward-container">
                 <h2>Forward Calculation</h2>
                 <div class="input-group">
-            <label for="datetime">Date Time (ISO 8601 format):</label>
-            <input type="text" id="datetime" placeholder="e.g. 2025-03-29T04:00:00.000Z">
-            <span id="datetime-error" class="error"></span>
-        </div>
-        <div class="input-group">
-            <label for="id">ID (16 characters hex):</label>
-            <input type="text" id="id" placeholder="e.g. 5d95b1cbb6293234ab6ea40d">
-            <span id="id-error" class="error"></span>
-        </div>
-        <div class="result-container">
-            <label>Result:</label>
-            <div class="result" id="result">-</div>
-            <div class="prefix-options">
-                <label>Add prefix:</label>
-                <select id="prefix-select">
-                    <option value="">None</option>
-                    <option value="sceneTimingWh_">sceneTimingWh_</option>
-                    <option value="sceneSun_">sceneSun_</option>
-                    <option value="sceneDelay_">sceneDelay_</option>
-                </select>
+                    <label for="datetime">Date Time (ISO 8601 format):</label>
+                    <input type="text" id="datetime" placeholder="e.g. 2025-03-29T04:00:00.000Z">
+                    <span id="datetime-error" class="error"></span>
+                </div>
+                <div class="input-group">
+                    <label for="id">ID (16 characters hex):</label>
+                    <input type="text" id="id" placeholder="e.g. 5d95b1cbb6293234ab6ea40d">
+                    <span id="id-error" class="error"></span>
+                </div>
+                <div class="result-container">
+                    <label>Result:</label>
+                    <div class="result" id="result">-</div>
+                    <div class="prefix-options">
+                        <label>Add prefix:</label>
+                        <select id="prefix-select">
+                            <option value="">None</option>
+                            <option value="sceneTimingWh_">sceneTimingWh_</option>
+                            <option value="sceneSun_">sceneSun_</option>
+                            <option value="sceneDelay_">sceneDelay_</option>
+                        </select>
+                    </div>
+                    <button id="copy-btn">Copy</button>
+                </div>
             </div>
-            <button id="copy-btn">Copy</button>
-        </div>
-        <div class="reverse-container">
-            <h2>Reverse Calculation</h2>
-            <div class="input-group">
-                <label for="reverse-code">Code (with optional prefix):</label>
-                <input type="text" id="reverse-code" placeholder="e.g. 12345 or sceneTimingWh_12345">
-                <button id="reverse-btn">Calculate Time</button>
+            <div class="reverse-container">
+                <h2>Reverse Calculation</h2>
+                <div class="input-group">
+                    <label for="reverse-code">Code (with optional prefix):</label>
+                    <input type="text" id="reverse-code" placeholder="e.g. 12345 or sceneTimingWh_12345">
+                    <button id="reverse-btn">Calculate Time</button>
+                </div>
+                <div class="result-container">
+                    <label>Possible Times:</label>
+                    <div class="result" id="reverse-result">-</div>
+                </div>
             </div>
-            <div class="result-container">
-                <label>Possible Times:</label>
-                <div class="result" id="reverse-result">-</div>
-            </div>
         </div>
-    </div>
-    <script src="script.js"></script>
+            <script src="script.js"></script>
 </body>
+
 </html>
