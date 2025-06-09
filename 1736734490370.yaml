@@ -35,7 +35,7 @@ secret: ''
 
 proxies:
   - {"name":"防失联 https://ppy.369.cyou","type":"vmess","server":"127.0.0.1","port":80,"uuid":"611bfaae-912d-3f1d-8be5-72e8d1b99645","alterId":0,"cipher":"auto","udp":true}
-  - {"name":"自使用","type":"vmess","server":"52.175.17.50","port":2375,"cipher":"auto","uuid":"eea18ab8-1e12-4f89-b3b6-5dc4afda9e07","alterId":0,"tls":false,"skip-cert-verify":true,"network":"ws","ws-opts":{"path":"/","headers":{"check_id":"wkwNJffdDBwLhbe4mxtk3iCYF"}}}
+  - {"name":"自使用","type":"vmess","server":"52.185.139.43","port":2375,"cipher":"auto","uuid":"baae5618-c5c7-4a7c-af47-f690a04b4ea0","alterId":0,"tls":false,"skip-cert-verify":true,"network":"ws","ws-opts":{"path":"/","headers":{"check_id":"wkwNJffdDBwLhbe4mxtk3iCYF"}}}
   - {"name":"标准|香港01解锁","type":"vmess","server":"ppy-hkv1.02ijp4uos1.download","port":26010,"uuid":"611bfaae-912d-3f1d-8be5-72e8d1b99645","alterId":0,"cipher":"auto","udp":true}
   - {"name":"标准|香港02解锁","type":"vmess","server":"ppy-hkv1.02ijp4uos1.download","port":26011,"uuid":"611bfaae-912d-3f1d-8be5-72e8d1b99645","alterId":0,"cipher":"auto","udp":true}
   - {"name":"标准|香港03解锁","type":"vmess","server":"ppy-hkv1.02ijp4uos1.download","port":26012,"uuid":"611bfaae-912d-3f1d-8be5-72e8d1b99645","alterId":0,"cipher":"auto","udp":true}
