@@ -253,6 +253,11 @@ proxy-groups:
     - 🔰国外流量
     - 🚀直接连接
 -
+  name: 🚀自使用搭建
+  type: select
+  proxies:
+    - 自使用
+-
   name: ✈️Telegram
   type: select
   proxies:
