@@ -1,0 +1,61 @@
+# ---------------------------------------------------
+# Clash 配置文件 - Vmess 单节点版
+# 由资深软件开发工程师提供 (已根据您的信息更新)
+# ---------------------------------------------------
+
+# 1. 基础配置 (Basic Configuration)
+# ---------------------------------------------------
+# HTTP 代理端口
+port: 7890
+# SOCKS5 代理端口
+socks-port: 7891
+# 允许局域网连接
+allow-lan: true
+# 代理模式: Rule (规则模式)
+mode: Rule
+# 日志级别: info
+log-level: info
+# Clash 的外部控制器地址
+external-controller: 127.0.0.1:9090
+
+# 2. 代理节点 (Proxies)
+# ---------------------------------------------------
+# 已根据你提供的信息进行配置
+proxies:
+  - name: "自使用" # <-- 来自你的信息
+    type: vmess # <-- 来自你的信息
+    server: "52.185.139.43" # <-- 来自你的信息
+    port: 2375 # <-- 来自你的信息
+    uuid: "baae5618-c5c7-4a7c-af47-f690a04b4ea0" # <-- 来自你的信息
+    alterId: 0 # <-- 来自你的信息
+    cipher: auto # <-- 来自你的信息
+    network: ws # <-- 来自你的信息
+    tls: false # <-- 来自你的信息，不开启TLS
+    skip-cert-verify: true # <-- 来自你的信息，跳过证书验证（tls为false时此项通常无影响，但保留兼容性）
+    ws-opts: # <-- WebSocket 配置，来自你的信息
+      path: "/"
+      headers:
+        check_id: "wkwNJffdDBwLhbe4mxtk3iCYF"
+
+# 3. 代理组 (Proxy Groups)
+# ---------------------------------------------------
+proxy-groups:
+  - name: "PROXY" # 主要的代理策略组
+    type: select # 允许手动选择
+    proxies:
+      - "自使用" # <-- 已更新为你的代理节点名称
+      - "DIRECT" # 保留一个 "DIRECT" 选项，方便切换
+
+# 4. 分流规则 (Rules)
+# ---------------------------------------------------
+# 规则保持不变，提供最佳实践
+rules:
+  # 国内主流网站直连
+  - GEOSITE,CN,DIRECT
+
+  # 局域网地址直连
+  - IP-CIDR,127.0.0.0/8,DIRECT
+  - IP-CIDR,192.168.0.0/16,DIRECT
+
+  # 最终规则：所有其他流量都走代理
+  - MATCH,PROXY
