@@ -50,8 +50,22 @@ proxy-groups:
 # ---------------------------------------------------
 # 规则保持不变，提供最佳实践
 rules:
+  # DingTalk
+  - DOMAIN-SUFFIX,ddurl.to,DIRECT
+  - DOMAIN-SUFFIX,dg-work.cn,DIRECT
+  - DOMAIN-SUFFIX,dingding.xin,DIRECT
+  - DOMAIN-SUFFIX,dingtalk.cn,DIRECT
+  - DOMAIN-SUFFIX,dingtalk.com,DIRECT
+  - DOMAIN-SUFFIX,dingtalk.com.cn,DIRECT
+  - DOMAIN-SUFFIX,dingtalk.net,DIRECT
+  - DOMAIN-SUFFIX,dingtalkapps.com,DIRECT
+  - DOMAIN-SUFFIX,laiwang.com,DIRECT
+  - DOMAIN-SUFFIX,lwurl.to,DIRECT
+  - DOMAIN-SUFFIX,realapp.xin,DIRECT
+
   # 国内主流网站直连
   - GEOSITE,CN,DIRECT
+  - GEOIP,CN,DIRECT
 
   # 局域网地址直连
   - IP-CIDR,127.0.0.0/8,DIRECT
