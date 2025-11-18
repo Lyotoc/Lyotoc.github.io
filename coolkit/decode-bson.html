@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 BSON 解码器 (替换模式)</title>
+    <script src="https://unpkg.com/bson@7.0.0-alpha.2/lib/bson.bundle.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        pre {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        h3 {
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Base64 BSON 解码工具</h1>
+        <p>该工具只会对以下字段进行 Base64-BSON 解码：<code>documentKey</code>, <code>document</code>, <code>updater.set</code>,
+            <code>updater.unset</code>。**解码后的对象将直接替换原 Base64 字符串**。
+        </p>
+
+        <textarea id="inputText"
+            placeholder="请在此输入 JSON 文本。每个 JSON 对象请单独占一行。
+
+示例:
+{&quot;operationType&quot;:&quot;update&quot;,&quot;documentKey&quot;:&quot;FgAAAAdfaWQAaJ8CXx93bUi2alKcAA==&quot;,&quot;updater&quot;:{&quot;set&quot;:&quot;OAAAAANwYXJhbXMuc3dpdGNoZXMuMgAgAAAAAnN3aXRjaAADAAAAb24AEG91dGxldAACAAAAAAA=&quot;},&quot;ts&quot;:1763457056}
+{&quot;operationType&quot;:&quot;update&quot;,&quot;documentKey&quot;:&quot;FgAAAAdfaWQAaJ8CXx93bUi2alKcAA==&quot;,&quot;updater&quot;:{&quot;set&quot;:&quot;OAAAAANwYXJhbXMuc3dpdGNoZXMuMQAgAAAAAnN3aXRjaAADAAAAb24AEG91dGxldAABAAAAAAA=&quot;},&quot;ts&quot;:1763457057}"></textarea>
+
+        <button onclick="decodeBSON()">解码 BSON 数据</button>
+
+        <h3>✅ 解码结果</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        // 确保 BSON 库正确引用。在 6.x 版本中，通常可以通过 window.BSON.BSON 访问
+        // const BSON = window.BSON.BSON || window.BSON;
+
+        /**
+         * 将 Base64 字符串解码为 Uint8Array
+         * @param {string} base64String Base64 字符串
+         * @returns {Uint8Array} 二进制数据
+         */
+        function base64ToBinary(base64String) {
+            // 浏览器原生的 atob 方法进行 Base64 解码
+            const binaryString = atob(base64String);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        /**
+         * 尝试对 Base64 字符串进行 BSON 解码
+         * @param {string} base64String Base64 字符串
+         * @returns {Object|string} 解码后的对象，或包含错误信息的对象
+         */
+        function decodeBase64BSON(base64String) {
+            if (typeof base64String !== 'string') return base64String;
+
+            try {
+                const bsonBytes = base64ToBinary(base64String);
+                // BSON.deserialize() 返回一个 JS 对象
+                return BSON.deserialize(bsonBytes);
+            } catch (e) {
+                // 解码失败时，返回一个带有错误信息的对象，以便在最终 JSON 中展示，同时保留原始数据
+                return {
+                    "**$BSON_DECODE_ERROR**": `无法解码 BSON: ${e.message}`,
+                    "**$Original_Base64**": base64String
+                };
+            }
+        }
+
+        /**
+         * 尝试对一个 JSON 对象的特定字段进行 BSON 解码并替换原值
+         * @param {Object} doc 要处理的 JSON 对象
+         * @returns {Object} 处理后的 JSON 对象
+         */
+        function processDocument(doc) {
+            // 1. 解码 documentKey
+            if (doc.documentKey) {
+                doc.documentKey = decodeBase64BSON(doc.documentKey);
+            }
+
+            // 2. 解码 document (如果存在)
+            if (doc.document) {
+                doc.document = decodeBase64BSON(doc.document);
+            }
+
+            // 3. 解码 updater 字段 (set, unset)
+            if (doc.updater && typeof doc.updater === 'object') {
+                if (doc.updater.set) {
+                    doc.updater.set = decodeBase64BSON(doc.updater.set);
+                }
+                // 注意：如果 updater.unset 本身就是对象（如示例中的 `{}`），则不应尝试 Base64 解码
+                if (typeof doc.updater.unset === 'string') {
+                    doc.updater.unset = decodeBase64BSON(doc.updater.unset);
+                }
+            }
+
+            return doc;
+        }
+
+
+        /**
+         * 主解码函数
+         */
+        function decodeBSON() {
+            const inputText = document.getElementById('inputText').value;
+            const outputElement = document.getElementById('output');
+            outputElement.textContent = ''; // 清空上次结果
+
+            // 按行分割输入，并过滤空行
+            const lines = inputText.trim().split('\n').filter(line => line.trim() !== '');
+            const decodedResults = [];
+
+            lines.forEach((line, index) => {
+                try {
+                    // 尝试将每一行解析为一个 JSON 对象
+                    const doc = JSON.parse(line);
+
+                    // 对解析后的对象进行 BSON 子字段的解码，并直接替换原值
+                    const processedDoc = processDocument(doc);
+
+                    // 将处理后的对象格式化为带缩进的 JSON 字符串
+                    decodedResults.push(JSON.stringify(processedDoc, null, 2));
+                } catch (e) {
+                    // 如果 JSON 解析失败
+                    decodedResults.push(`--- 行 ${index + 1} JSON 解析错误 ---\n${line}\n错误信息: ${e.message}`);
+                }
+            });
+
+            // 将所有结果合并显示，使用双空行分隔
+            outputElement.textContent = decodedResults.join('\n\n');
+        }
+
+        // 移除 window.onload 赋值，只保留 placeholder 文本
+    </script>
+
+</body>
+
+</html>
