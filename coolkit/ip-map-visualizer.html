@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海量 IP 地图可视化工具 (MaxMind DB 版)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        #map { height: 100%; width: 100%; z-index: 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Toast 动画 */
+        .toast-enter { transform: translateY(-100%); opacity: 0; }
+        .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 300ms ease-out; }
+        .toast-exit { transform: translateY(0); opacity: 1; }
+        .toast-exit-active { transform: translateY(-100%); opacity: 0; transition: all 300ms ease-in; }
+
+        /* 分析面板动画 */
+        .panel-transition { transition: transform 0.3s ease-in-out; }
+        .panel-collapsed { transform: translateY(calc(100% - 40px)); } /* 只露出标题栏 */
+        .panel-expanded { transform: translateY(0); }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex bg-gray-100 font-sans text-gray-800">
+
+    <!-- 侧边栏 -->
+    <div class="w-96 flex-shrink-0 bg-white shadow-xl z-50 flex flex-col h-full border-r border-gray-200">
+        <div class="p-4 border-b border-gray-200 bg-gray-50">
+            <h1 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                IP 地图可视化
+            </h1>
+            <p class="text-xs text-gray-500 mt-1">支持 MaxMind 本地离线库</p>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            
+            <!-- 数据库设置 -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                <h3 class="font-bold text-sm text-yellow-800 mb-2 flex items-center gap-2">
+                    <span>1. 加载 IP 数据库 (推荐)</span>
+                    <span id="dbStatusBadge" class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">未加载</span>
+                </h3>
+                <p class="text-xs text-yellow-700 mb-2">请加载 <code class="bg-yellow-100 px-1">GeoLite2-City.mmdb</code> 文件以获取真实位置。</p>
+                <div class="relative border border-dashed border-yellow-400 bg-white rounded p-2 hover:bg-yellow-50 cursor-pointer text-center" onclick="document.getElementById('mmdbInput').click()">
+                    <input type="file" id="mmdbInput" accept=".mmdb" class="hidden">
+                    <p class="text-xs text-gray-500" id="mmdbFileName">点击选择 .mmdb 文件</p>
+                </div>
+            </div>
+
+            <!-- 数据输入 -->
+            <div>
+                <h3 class="font-bold text-sm text-gray-700 mb-2">2. 输入 IP 数据</h3>
+                
+                <!-- 文件上传 -->
+                <div class="mb-2">
+                    <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-3 hover:bg-gray-50 cursor-pointer text-center" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept=".txt,.csv" class="hidden">
+                        <p class="text-xs text-gray-500" id="fileNameDisplay">上传 IP 列表文件 (.txt)</p>
+                    </div>
+                </div>
+
+                <div class="text-center text-gray-300 text-xs my-1">- 或 -</div>
+
+                <!-- 文本输入 -->
+                <div class="flex flex-col h-40">
+                    <textarea id="ipInput" class="flex-1 w-full p-2 border border-gray-300 rounded-md text-xs font-mono resize-none focus:ring-1 focus:ring-blue-500" placeholder="在此粘贴 IP 列表..."></textarea>
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span id="lineCount">0 行</span>
+                        <span class="cursor-pointer text-blue-500 hover:text-blue-700" id="genRandomBtn">生成测试数据</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 渲染设置 -->
+            <div class="bg-gray-50 p-3 rounded-md border border-gray-200">
+                <div class="flex items-center gap-2 mb-1">
+                    <input type="checkbox" id="heatmapMode" class="rounded text-blue-600">
+                    <label for="heatmapMode" class="text-xs text-gray-700 cursor-pointer select-none">开启热力点样式</label>
+                </div>
+                <div class="text-[10px] text-gray-400">若未加载数据库，将使用模拟算法展示。</div>
+            </div>
+
+            <!-- 统计信息 -->
+            <div id="statsPanel" class="hidden bg-gray-100 p-3 rounded text-xs space-y-1">
+                <div class="flex justify-between"><span>总行数:</span> <span id="totalCount" class="font-bold">0</span></div>
+                <div class="flex justify-between"><span>成功定位:</span> <span id="validCount" class="font-bold text-green-600">0</span></div>
+                <div class="flex justify-between"><span>无效/未找到:</span> <span id="invalidCount" class="font-bold text-red-500">0</span></div>
+            </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="p-4 border-t border-gray-200 bg-gray-50 space-y-2">
+            <div id="progressBarContainer" class="hidden w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            
+            <button id="renderBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors flex justify-center items-center gap-2">
+                <span>开始渲染地图</span>
+            </button>
+            <button id="clearBtn" class="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-2 px-4 rounded transition-colors text-sm">
+                清空地图
+            </button>
+        </div>
+    </div>
+
+    <!-- 地图区域 -->
+    <div class="flex-1 relative overflow-hidden flex flex-col">
+        <div class="relative flex-1 w-full h-full">
+            <div id="map"></div>
+            
+            <!-- 覆盖层：图例 -->
+            <div class="absolute top-4 right-4 z-[400] bg-white/90 backdrop-blur p-2 rounded shadow-lg text-xs">
+                <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-blue-500 opacity-60"></div> <span>IP 位置</span></div>
+                <div id="sourceIndicator" class="text-gray-500 italic">模式: 模拟定位</div>
+            </div>
+
+            <!-- 底部可展开分析面板 -->
+            <div id="analysisPanel" class="absolute bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-[1000] rounded-t-xl panel-transition panel-collapsed h-80 flex flex-col">
+                <!-- 标题栏 (点击可切换) -->
+                <div id="panelHeader" class="h-10 bg-gray-50 hover:bg-gray-100 border-b border-gray-200 cursor-pointer flex items-center justify-between px-6 rounded-t-xl select-none" onclick="toggleAnalysisPanel()">
+                    <div class="flex items-center gap-2 font-bold text-gray-700 text-sm">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        数据分析洞察
+                        <span class="text-xs font-normal text-gray-500 ml-2" id="analysisSubtitle">(点击展开)</span>
+                    </div>
+                    <div class="transform transition-transform duration-300" id="panelChevron">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </div>
+                </div>
+
+                <!-- 内容区 -->
+                <div class="flex-1 overflow-auto p-6 grid grid-cols-2 gap-8">
+                    <!-- 左侧：Top Countries -->
+                    <div class="flex flex-col">
+                        <h4 class="text-sm font-bold text-gray-600 mb-3 border-l-4 border-blue-500 pl-2">Top 5 国家/地区</h4>
+                        <div id="countryStatsList" class="space-y-3 text-xs">
+                            <div class="text-gray-400 italic">暂无数据...</div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：Continent Distribution -->
+                    <div class="flex flex-col">
+                        <h4 class="text-sm font-bold text-gray-600 mb-3 border-l-4 border-green-500 pl-2">大洲分布</h4>
+                        <div id="continentStatsList" class="space-y-3 text-xs">
+                            <div class="text-gray-400 italic">暂无数据...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 逻辑脚本 -->
+    <script type="module">
+        // 导入 mmdb-lib 和 buffer
+        import { Reader } from 'https://esm.sh/mmdb-lib@2.1.1';
+        import { Buffer } from 'https://esm.sh/buffer';
+
+        // 全局变量
+        let mmdbReader = null;
+        let map, pointsLayerGroup;
+        let isProcessing = false;
+        const CHUNK_SIZE = 5000;
+        const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
+        // 统计数据容器
+        let analysisStats = {
+            countries: {},
+            continents: {},
+            totalValid: 0
+        };
+
+        // --- UI 工具: Toast 提示 ---
+        function showToast(message, type = 'error') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-600' : 'bg-green-600';
+            toast.className = `fixed top-5 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-6 py-3 rounded-full shadow-lg z-[9999] text-sm font-bold flex items-center gap-2 toast-enter`;
+            
+            const icon = type === 'error' 
+                ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            
+            toast.innerHTML = `${icon}<span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => toast.classList.add('toast-enter-active'));
+
+            setTimeout(() => {
+                toast.classList.remove('toast-enter-active');
+                toast.classList.add('toast-exit-active');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- UI 工具: 面板切换 ---
+        window.toggleAnalysisPanel = function(forceState) {
+            const panel = document.getElementById('analysisPanel');
+            const chevron = document.getElementById('panelChevron');
+            const subtitle = document.getElementById('analysisSubtitle');
+            
+            const isCollapsed = panel.classList.contains('panel-collapsed');
+            const shouldExpand = forceState !== undefined ? forceState : isCollapsed;
+
+            if (shouldExpand) {
+                panel.classList.remove('panel-collapsed');
+                panel.classList.add('panel-expanded');
+                chevron.style.transform = 'rotate(180deg)';
+                subtitle.innerText = "(点击收起)";
+            } else {
+                panel.classList.remove('panel-expanded');
+                panel.classList.add('panel-collapsed');
+                chevron.style.transform = 'rotate(0deg)';
+                subtitle.innerText = "(点击展开)";
+            }
+        };
+
+        // --- 初始化地图 ---
+        function initMap() {
+            map = L.map('map', { preferCanvas: true, zoomControl: false }).setView([20, 0], 2);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+            pointsLayerGroup = L.layerGroup().addTo(map);
+        }
+
+        // --- MMDB 处理逻辑 ---
+        const mmdbInput = document.getElementById('mmdbInput');
+        const mmdbFileName = document.getElementById('mmdbFileName');
+        const dbStatusBadge = document.getElementById('dbStatusBadge');
+        const sourceIndicator = document.getElementById('sourceIndicator');
+
+        mmdbInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            mmdbFileName.innerText = "正在加载数据库...";
+            dbStatusBadge.innerText = "加载中...";
+            dbStatusBadge.className = "bg-yellow-200 text-yellow-800 text-[10px] px-2 py-0.5 rounded-full";
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                mmdbReader = new Reader(buffer);
+                
+                mmdbFileName.innerText = file.name;
+                dbStatusBadge.innerText = "已加载";
+                dbStatusBadge.className = "bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full";
+                sourceIndicator.innerText = "模式: 真实数据库 (MaxMind)";
+                sourceIndicator.className = "text-green-600 font-bold";
+                showToast("数据库加载成功！", "success");
+            } catch (err) {
+                console.error("MMDB Load Error:", err);
+                showToast(`数据库加载失败: ${err.message || "格式错误"}`, "error");
+                
+                mmdbFileName.innerText = "加载失败，请重试";
+                dbStatusBadge.innerText = "错误";
+                dbStatusBadge.className = "bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded-full";
+                mmdbReader = null;
+            }
+        });
+
+        // --- IP 列表文件处理 ---
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('fileNameDisplay').innerText = file.name;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('ipInput').value = ev.target.result;
+                updateLineCount();
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('ipInput').addEventListener('input', updateLineCount);
+
+        function updateLineCount() {
+            const lines = document.getElementById('ipInput').value.split('\n').length;
+            document.getElementById('lineCount').innerText = `${lines} 行`;
+        }
+
+        // --- 生成测试数据 ---
+        document.getElementById('genRandomBtn').addEventListener('click', (e) => {
+            const btn = e.target;
+            const originalText = btn.innerText;
+            btn.innerText = "生成中...";
+            setTimeout(() => {
+                const count = 100000;
+                const ips = [];
+                for (let i = 0; i < count; i++) {
+                    const o1 = Math.floor(Math.random() * 220) + 1;
+                    const o2 = Math.floor(Math.random() * 255);
+                    const o3 = Math.floor(Math.random() * 255);
+                    const o4 = Math.floor(Math.random() * 255);
+                    ips.push(`${o1}.${o2}.${o3}.${o4}`);
+                }
+                document.getElementById('ipInput').value = ips.join('\n');
+                updateLineCount();
+                btn.innerText = originalText;
+            }, 50);
+        });
+
+        // --- 清空地图 ---
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            pointsLayerGroup.clearLayers();
+            document.getElementById('totalCount').innerText = '0';
+            document.getElementById('validCount').innerText = '0';
+            document.getElementById('invalidCount').innerText = '0';
+            document.getElementById('statsPanel').classList.add('hidden');
+            document.getElementById('progressBarContainer').classList.add('hidden');
+            
+            // 重置分析面板
+            analysisStats = { countries: {}, continents: {}, totalValid: 0 };
+            renderAnalysisUI();
+            toggleAnalysisPanel(false);
+        });
+
+        // --- 核心处理逻辑 ---
+        document.getElementById('renderBtn').addEventListener('click', () => {
+            if (isProcessing) return;
+            const rawText = document.getElementById('ipInput').value;
+            if (!rawText.trim()) { 
+                showToast("请先输入 IP 列表", "error"); 
+                return; 
+            }
+
+            // Reset
+            pointsLayerGroup.clearLayers();
+            analysisStats = { countries: {}, continents: {}, totalValid: 0 };
+            
+            isProcessing = true;
+            const btn = document.getElementById('renderBtn');
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = `<div class="loader mr-2 border-t-white border-white"></div> 处理中...`;
+            btn.disabled = true;
+            document.getElementById('progressBarContainer').classList.remove('hidden');
+            document.getElementById('statsPanel').classList.remove('hidden');
+
+            const lines = rawText.split('\n');
+            let processedCount = 0;
+            let validCount = 0;
+            let invalidCount = 0;
+            const totalLines = lines.length;
+            const useHeatmapStyle = document.getElementById('heatmapMode').checked;
+            const myRenderer = L.canvas({ padding: 0.5 });
+
+            let currentIndex = 0;
+
+            function processChunk() {
+                const endIndex = Math.min(currentIndex + CHUNK_SIZE, totalLines);
+                const markers = [];
+
+                for (let i = currentIndex; i < endIndex; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    const match = line.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+                    if (match && ipv4Regex.test(match[0])) {
+                        const ip = match[0];
+                        const loc = resolveIpLocation(ip);
+
+                        if (loc) {
+                            // 1. 创建 Marker
+                            const marker = L.circleMarker(loc, {
+                                renderer: myRenderer,
+                                radius: useHeatmapStyle ? 3 : 2,
+                                fillColor: "#3B82F6",
+                                color: useHeatmapStyle ? "#3B82F6" : "#2563EB",
+                                weight: 0,
+                                opacity: 1,
+                                fillOpacity: useHeatmapStyle ? 0.3 : 0.8
+                            });
+                            
+                            let popupContent = `<b>IP:</b> ${ip}<br><b>Lat:</b> ${loc[0].toFixed(4)}, <b>Lng:</b> ${loc[1].toFixed(4)}`;
+                            if (loc.country) popupContent += `<br><b>Region:</b> ${loc.country}`;
+                            if (loc.continent) popupContent += `<br><b>Continent:</b> ${loc.continent}`;
+                            marker.bindPopup(popupContent);
+                            markers.push(marker);
+                            
+                            // 2. 统计数据
+                            const countryName = loc.country || "未知国家";
+                            const continentName = loc.continent || "未知大洲";
+                            
+                            analysisStats.countries[countryName] = (analysisStats.countries[countryName] || 0) + 1;
+                            analysisStats.continents[continentName] = (analysisStats.continents[continentName] || 0) + 1;
+                            analysisStats.totalValid++;
+
+                            validCount++;
+                        } else {
+                            invalidCount++;
+                        }
+                    } else {
+                        invalidCount++;
+                    }
+                }
+
+                if (markers.length > 0) {
+                    markers.forEach(m => m.addTo(pointsLayerGroup));
+                }
+
+                processedCount = endIndex;
+                currentIndex = endIndex;
+
+                const progress = (processedCount / totalLines) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('totalCount').innerText = totalLines;
+                document.getElementById('validCount').innerText = validCount;
+                document.getElementById('invalidCount').innerText = invalidCount;
+
+                if (currentIndex < totalLines) {
+                    requestAnimationFrame(processChunk);
+                } else {
+                    // 完成
+                    isProcessing = false;
+                    btn.innerHTML = originalBtnText;
+                    btn.disabled = false;
+                    
+                    // 渲染分析图表
+                    renderAnalysisUI();
+                    showToast("地图渲染完成！查看下方分析面板", "success");
+                    // 自动展开一点点提示用户
+                    setTimeout(() => toggleAnalysisPanel(true), 500);
+                }
+            }
+            requestAnimationFrame(processChunk);
+        });
+
+        // --- 数据渲染逻辑 ---
+        function renderAnalysisUI() {
+            const countryList = document.getElementById('countryStatsList');
+            const continentList = document.getElementById('continentStatsList');
+            const total = analysisStats.totalValid;
+
+            if (total === 0) {
+                countryList.innerHTML = '<div class="text-gray-400 italic">暂无数据...</div>';
+                continentList.innerHTML = '<div class="text-gray-400 italic">暂无数据...</div>';
+                return;
+            }
+
+            // 1. 渲染国家 (Top 5)
+            const sortedCountries = Object.entries(analysisStats.countries)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            countryList.innerHTML = sortedCountries.map(([name, count]) => {
+                const percent = ((count / total) * 100).toFixed(1);
+                return `
+                    <div class="relative">
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-gray-700 truncate w-24">${name}</span>
+                            <span class="text-gray-500">${count.toLocaleString()} (${percent}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 2. 渲染大洲 (All)
+            const sortedContinents = Object.entries(analysisStats.continents)
+                .sort((a, b) => b[1] - a[1]);
+            
+            continentList.innerHTML = sortedContinents.map(([name, count]) => {
+                const percent = ((count / total) * 100).toFixed(1);
+                return `
+                    <div class="relative">
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-gray-700">${name}</span>
+                            <span class="text-gray-500">${percent}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 核心算法：IP 解析 ---
+        function resolveIpLocation(ip) {
+            // 策略 1: 真实数据库
+            if (mmdbReader) {
+                try {
+                    const result = mmdbReader.get(ip);
+                    if (result && result.location) {
+                        const lat = result.location.latitude;
+                        const lng = result.location.longitude;
+                        
+                        let country = "未知国家";
+                        if (result.country && result.country.names && result.country.names['zh-CN']) {
+                            country = result.country.names['zh-CN'];
+                        } else if (result.city && result.city.names && result.city.names['zh-CN']) {
+                            country = result.city.names['zh-CN'];
+                        }
+
+                        let continent = "未知大洲";
+                        if (result.continent && result.continent.names && result.continent.names['zh-CN']) {
+                            continent = result.continent.names['zh-CN'];
+                        }
+
+                        const coords = [lat, lng];
+                        coords.country = country;
+                        coords.continent = continent;
+                        return coords;
+                    }
+                    return null;
+                } catch (e) {
+                    return null;
+                }
+            }
+            // 策略 2: 模拟算法
+            return simulateIpLocation(ip);
+        }
+
+        // 增强版模拟算法 (返回更真实的伪造地名)
+        function simulateIpLocation(ip) {
+            const parts = ip.split('.').map(Number);
+            const hash = (parts[0] * 16777216) + (parts[1] * 65536) + (parts[2] * 256) + parts[3];
+            let lng = ((hash % 36000) / 100) - 180;
+            let lat = ((hash % 13000) / 100) - 60;
+            
+            let country = "其他地区";
+            let continent = "未知";
+
+            const octet1 = parts[0];
+            if (octet1 < 50) { 
+                lat = 30 + (parts[1] % 20); lng = -100 + (parts[2] % 40); 
+                country = (parts[1] % 2 === 0) ? "美国" : "加拿大";
+                continent = "北美洲";
+            }
+            else if (octet1 >= 50 && octet1 < 100) { 
+                lat = 40 + (parts[1] % 20); lng = 10 + (parts[2] % 30); 
+                const countries = ["英国", "德国", "法国", "意大利", "西班牙"];
+                country = countries[parts[1] % countries.length];
+                continent = "欧洲";
+            }
+            else if (octet1 >= 100 && octet1 < 170) { 
+                lat = 35 + (parts[1] % 20); lng = 105 + (parts[2] % 40); 
+                const countries = ["中国", "日本", "韩国", "印度", "泰国"];
+                country = countries[parts[1] % countries.length];
+                continent = "亚洲";
+            }
+            else if (octet1 >= 170 && octet1 < 200) { 
+                lat = -10 + (parts[1] % 40); lng = -60 + (parts[2] % 30); 
+                country = "巴西";
+                continent = "南美洲";
+            }
+            else {
+                country = "澳大利亚";
+                continent = "大洋洲";
+            }
+            
+            lat += (parts[2] % 100) / 1000;
+            lng += (parts[3] % 100) / 1000;
+            const coords = [lat, lng];
+            coords.country = country + " (模拟)";
+            coords.continent = continent;
+            return coords;
+        }
+
+        initMap();
+
+    </script>
+</body>
+</html>
