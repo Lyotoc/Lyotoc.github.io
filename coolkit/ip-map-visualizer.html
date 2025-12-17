@@ -153,7 +153,7 @@
                 <div class="flex-1 overflow-auto p-6 grid grid-cols-2 gap-8">
                     <!-- 左侧：Top Countries -->
                     <div class="flex flex-col">
-                        <h4 class="text-sm font-bold text-gray-600 mb-3 border-l-4 border-blue-500 pl-2">Top 5 国家/地区</h4>
+                        <h4 class="text-sm font-bold text-gray-600 mb-3 border-l-4 border-blue-500 pl-2">Top 10 国家/地区</h4>
                         <div id="countryStatsList" class="space-y-3 text-xs">
                             <div class="text-gray-400 italic">暂无数据...</div>
                         </div>
@@ -461,10 +461,10 @@
                 return;
             }
 
-            // 1. 渲染国家 (Top 5)
+            // 1. 渲染国家 (Top 10)
             const sortedCountries = Object.entries(analysisStats.countries)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
+                .slice(0, 10);
             
             countryList.innerHTML = sortedCountries.map(([name, count]) => {
                 const percent = ((count / total) * 100).toFixed(1);
