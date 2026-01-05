@@ -89,7 +89,6 @@
         .tool-container.active { display: block; }
 
         /* --- Tool 1 (Dark Mode) CSS Scope --- */
-        /* 重写 Tool 1 CSS 以适应 .tool-v1 容器且不使用 ID 选择器 */
         .tool-v1 {
             --bg: #0b0c10; --card: #14161f; --txt: #e8e8ea; --muted: #b6b7bd; --line: #2a2d3a;
             --good: #2bd576; --warn: #ffcc00; --bad: #ff4d4d;
@@ -167,6 +166,9 @@
         .tool-v2 input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #FF9900; cursor: pointer; margin-top: -6px; box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d; }
         .tool-v2 input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e5e7eb; border-radius: 2px; }
         
+        .tool-v2 .analysis-table td, .tool-v2 .analysis-table th { padding: 4px 8px; text-align: right; }
+        .tool-v2 .analysis-table td:first-child, .tool-v2 .analysis-table th:first-child { text-align: left; }
+
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -192,11 +194,11 @@
         <div class="create-actions">
             <button class="btn-create" onclick="App.createInstance('v1')">
                 <i class="fa-solid fa-microscope" style="color:#2bd576"></i>
-                深度质检 (gpt提供)
+                深度质检 (GPT)
             </button>
             <button class="btn-create" onclick="App.createInstance('v2')">
                 <i class="fa-solid fa-wand-magic-sparkles" style="color:#FF9900"></i>
-                合规修复 (gemini提供)
+                合规修复 (GEMINI)
             </button>
         </div>
 
@@ -220,7 +222,6 @@
 <script>
 /**
  * Application Manager
- * Handles creating instances, tab switching, and DOM isolation.
  */
 const App = {
     instances: [],
@@ -231,7 +232,6 @@ const App = {
         const id = `inst-${this.counter}`;
         const title = type === 'v1' ? `深度质检 #${this.counter}` : `合规修复 #${this.counter}`;
         
-        // 1. Create Sidebar Item
         const listItem = document.createElement('div');
         listItem.className = 'instance-item active';
         listItem.dataset.id = id;
@@ -241,33 +241,26 @@ const App = {
         `;
         document.getElementById('instance-list').appendChild(listItem);
 
-        // 2. Create Workspace Container
         const container = document.createElement('div');
         container.id = id;
         container.className = `tool-container active ${type === 'v1' ? 'tool-v1' : 'tool-v2'}`;
         document.getElementById('workspace').appendChild(container);
 
-        // 3. Initialize Logic based on Type
         if (type === 'v1') {
             initToolV1(container);
         } else {
             initToolV2(container);
         }
 
-        // 4. Update State
         this.instances.push({ id, type });
         this.switchTab(id);
-        
-        // Hide empty state
         document.getElementById('empty-placeholder').style.display = 'none';
     },
 
     switchTab(id) {
-        // Sidebar active state
         document.querySelectorAll('.instance-item').forEach(el => {
             el.classList.toggle('active', el.dataset.id === id);
         });
-        // Workspace visible state
         document.querySelectorAll('.tool-container').forEach(el => {
             el.classList.toggle('active', el.id === id);
         });
@@ -275,18 +268,11 @@ const App = {
 
     closeInstance(id, event) {
         event.stopPropagation();
-        
-        // Remove DOM
         const sidebarItem = document.querySelector(`.instance-item[data-id="${id}"]`);
         if (sidebarItem) sidebarItem.remove();
-        
         const container = document.getElementById(id);
         if (container) container.remove();
-
-        // Update data
         this.instances = this.instances.filter(i => i.id !== id);
-
-        // Switch to last available or show empty
         if (this.instances.length > 0) {
             this.switchTab(this.instances[this.instances.length - 1].id);
         } else {
@@ -297,11 +283,10 @@ const App = {
 
 /**
  * =============================================================================
- * TOOL 1: 深度质检 (Dark Mode) - Adapted Factory
+ * TOOL 1: 深度质检 (Dark Mode)
  * =============================================================================
  */
 function initToolV1(container) {
-    // Inject HTML Structure (Converted IDs to data-ui to prevent global conflicts)
     container.innerHTML = `
     <header><h1>Amazon 主图质检：白底 + 主体占比（离线单页）</h1></header>
     <main class="grid">
@@ -347,7 +332,6 @@ function initToolV1(container) {
     </main>
     `;
 
-    // Scoped Selector Helper
     const $ = (name) => container.querySelector(`[data-ui="${name}"]`);
 
     const fileEl = $('file');
@@ -385,7 +369,6 @@ function initToolV1(container) {
 
     let imgBitmap = null;
 
-    // --- Core Logic from File 1 (Unchanged logic, just scoped) ---
     const clamp = (x,a,b) => Math.max(a, Math.min(b,x));
     const pct = (n, total) => (100*n/Math.max(1,total)).toFixed(2);
 
@@ -813,7 +796,7 @@ function initToolV1(container) {
 
 /**
  * =============================================================================
- * TOOL 2: 合规修复专业版 (Light Mode) - Adapted Factory
+ * TOOL 2: 合规修复专业版 (Light Mode) - Fully Ported
  * =============================================================================
  */
 function initToolV2(container) {
@@ -832,45 +815,46 @@ function initToolV2(container) {
                     <input type="file" data-ui="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/jpeg, image/png, image/tiff, image/gif">
                     <div class="flex flex-col items-center justify-center space-y-3">
                         <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-400"></i>
-                        <p class="text-lg font-semibold text-gray-700">点击或拖拽图片</p>
+                        <p class="text-lg font-semibold text-gray-700">点击或拖拽图片到此处</p>
+                        <p class="text-sm text-gray-500">支持 JPG, PNG, TIFF, GIF (建议 JPG/PNG)</p>
                     </div>
                 </div>
                 <div data-ui="preview-container" class="hidden bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
-                        <h3 class="font-bold text-gray-700 flex items-center">预览 <span class="text-xs font-normal text-red-500 ml-2 hidden bg-red-50 px-2 py-0.5 rounded border border-red-100" data-ui="error-legend"><i class="fa-solid fa-circle text-[8px] mr-1"></i>红色点: 脏点 | 蓝色框: 主体</span></h3>
-                        <div class="flex items-center gap-2"><span data-ui="image-dims" class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600 font-mono">-- x -- px</span><button data-ui="btn-reupload" class="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-100 transition"><i class="fa-solid fa-upload"></i> 新图</button></div>
+                        <h3 class="font-bold text-gray-700 flex items-center">图片预览 <span class="text-xs font-normal text-red-500 ml-2 hidden bg-red-50 px-2 py-0.5 rounded border border-red-100" data-ui="error-legend"><i class="fa-solid fa-circle text-[8px] mr-1"></i>红色点: 脏点 | 蓝色框: 主体识别范围</span></h3>
+                        <div class="flex items-center gap-2"><span data-ui="image-dims" class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600 font-mono">-- x -- px</span><button data-ui="btn-reupload" class="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-100 transition"><i class="fa-solid fa-upload"></i> 上传新图</button></div>
                     </div>
                     <div class="relative w-full h-96 flex items-center justify-center bg-gray-100 rounded overflow-hidden transparency-grid">
                         <canvas data-ui="main-canvas" class="max-w-full max-h-full shadow-lg object-contain"></canvas>
                         <div data-ui="loading-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-10 hidden"><div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div><p class="text-white mt-2 font-semibold">处理中...</p></div>
                     </div>
                     <div class="mt-4 flex flex-wrap gap-3 justify-between items-center border-t pt-4">
-                        <div class="text-xs text-gray-400">提示：请先调整容差以准确识别。</div>
-                        <div class="flex gap-2"><button data-ui="btn-reset" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium border rounded hover:bg-gray-50 transition"><i class="fa-solid fa-rotate-left mr-1"></i> 还原</button><button data-ui="btn-download" class="px-4 py-2 bg-amazon-light hover:bg-gray-700 text-white text-sm font-bold rounded shadow disabled:opacity-50 disabled:cursor-not-allowed transition"><i class="fa-solid fa-download mr-1"></i> 下载</button></div>
+                        <div class="text-xs text-gray-400">提示：主体识别基于当前容差设置，请先调整容差以准确识别。</div>
+                        <div class="flex gap-2"><button data-ui="btn-reset" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium border rounded hover:bg-gray-50 transition"><i class="fa-solid fa-rotate-left mr-1"></i> 还原原图</button><button data-ui="btn-download" class="px-4 py-2 bg-amazon-light hover:bg-gray-700 text-white text-sm font-bold rounded shadow disabled:opacity-50 disabled:cursor-not-allowed transition"><i class="fa-solid fa-download mr-1"></i> 下载修复结果</button></div>
                     </div>
                 </div>
             </div>
             <!-- Right: Tools -->
             <div class="space-y-6">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                    <div class="flex justify-between items-center mb-3 cursor-pointer" data-ui="settings-toggle"><h2 class="text-sm font-bold text-gray-800 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> 高级参数</h2><i data-ui="settings-chevron" class="fa-solid fa-chevron-down text-gray-400 text-xs transition-transform"></i></div>
+                    <div class="flex justify-between items-center mb-3 cursor-pointer" data-ui="settings-toggle"><h2 class="text-sm font-bold text-gray-800 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> 高级参数设置</h2><i data-ui="settings-chevron" class="fa-solid fa-chevron-down text-gray-400 text-xs transition-transform"></i></div>
                     <div data-ui="settings-panel" class="space-y-4 text-xs border-t pt-3 hidden">
-                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600">颜色容差</label><input type="number" data-ui="num-tolerance" min="0" max="100" value="20" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-tolerance" min="0" max="100" value="20"></div>
-                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600">最低亮度</label><input type="number" data-ui="num-min-channel" min="0" max="255" value="200" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-min-channel" min="0" max="255" value="200"></div>
-                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600">边缘采样</label><input type="number" data-ui="num-edge-step" min="1" max="30" value="6" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-edge-step" min="1" max="30" value="6"></div>
+                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600" title="控制颜色差异的允许范围">1. 颜色容差 (Tolerance)</label><input type="number" data-ui="num-tolerance" min="0" max="100" value="20" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-tolerance" min="0" max="100" value="20"><p class="text-[10px] text-gray-400 mt-1">建议: 15-30。影响主体识别范围和漂白力度。</p></div>
+                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600" title="判定为背景的最低亮度阈值">2. 最低亮度 (Min Channel)</label><input type="number" data-ui="num-min-channel" min="0" max="255" value="200" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-min-channel" min="0" max="255" value="200"><p class="text-[10px] text-gray-400 mt-1">建议: 180-220。低于此亮度的像素视为商品内容。</p></div>
+                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600" title="边缘检测的采样密度">3. 边缘采样步长 (px)</label><input type="number" data-ui="num-edge-step" min="1" max="30" value="6" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-edge-step" min="1" max="30" value="6"><p class="text-[10px] text-gray-400 mt-1">建议: 3-10。数值小更精准，数值大检测更快。</p></div>
                     </div>
                 </div>
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4">合规性检测</h2>
-                    <button data-ui="btn-manual-check" class="w-full mb-6 py-2.5 bg-amazon-orange hover:bg-yellow-500 text-gray-900 font-bold rounded shadow transition flex items-center justify-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> 开始检测</button>
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">合规性检测报告</h2>
+                    <button data-ui="btn-manual-check" class="w-full mb-6 py-2.5 bg-amazon-orange hover:bg-yellow-500 text-gray-900 font-bold rounded shadow transition flex items-center justify-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> 开始合规检测</button>
                     <ul class="space-y-4 text-sm" data-ui="report-list"></ul>
                     <div data-ui="overall-status" class="mt-6 p-3 rounded text-center font-bold hidden"></div>
                 </div>
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
                     <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">修复工具</h2>
-                    <div class="mb-6 border-b border-gray-100 pb-4"><h3 class="font-semibold text-gray-700 text-sm mb-2">1. 快速漂白 (本地)</h3><button data-ui="btn-auto-whiten" class="w-full py-2 bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium transition">执行漂白</button></div>
-                    <div class="mb-6 border-b border-gray-100 pb-4"><h3 class="font-semibold text-gray-700 text-sm mb-2 flex justify-between"><span>2. AI 抠图 (API)</span><span class="bg-yellow-100 text-yellow-800 text-[10px] px-1 rounded">强力</span></h3><input type="password" data-ui="api-key-input" placeholder="Remove.bg API Key" class="w-full text-xs p-2 border border-gray-300 rounded mb-2"><button data-ui="btn-api-remove" class="w-full py-2 btn-primary rounded text-sm font-bold shadow">一键抠图</button></div>
-                    <div><h3 class="font-semibold text-gray-700 text-sm mb-2 flex justify-between"><span>3. 画布扩展</span><span class="bg-blue-100 text-blue-800 text-[10px] px-1 rounded">补边</span></h3><div class="flex items-center gap-2 mb-2"><input type="number" data-ui="expansion-input" value="50" min="1" class="w-20 text-xs p-2 border border-gray-300 rounded text-center"><span class="text-xs text-gray-600">px</span></div><button data-ui="btn-expand-canvas" class="w-full py-2 bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium"><i class="fa-solid fa-expand mr-1 text-xs"></i> 执行扩展</button></div>
+                    <div class="mb-6 border-b border-gray-100 pb-4"><h3 class="font-semibold text-gray-700 text-sm mb-2">1. 快速背景漂白 (本地)</h3><p class="text-xs text-gray-500 mb-2">基于<span class="text-blue-600 font-medium">容差</span>和<span class="text-blue-600 font-medium">最低亮度</span>强制将浅色背景转为纯白。</p><button data-ui="btn-auto-whiten" class="w-full py-2 bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium transition disabled:opacity-50">执行漂白</button></div>
+                    <div class="mb-6 border-b border-gray-100 pb-4"><h3 class="font-semibold text-gray-700 text-sm mb-2 flex justify-between"><span>2. 智能 AI 抠图 (API)</span><span class="bg-yellow-100 text-yellow-800 text-[10px] px-1.5 py-0.5 rounded border border-yellow-200">强力</span></h3><input type="password" data-ui="api-key-input" placeholder="输入 Remove.bg API Key" class="w-full text-xs p-2 border border-gray-300 rounded mb-2"><button data-ui="btn-api-remove" class="w-full py-2 btn-primary rounded text-sm font-bold shadow disabled:opacity-50">一键抠图</button></div>
+                    <div><h3 class="font-semibold text-gray-700 text-sm mb-2 flex justify-between"><span>3. 画布扩展 (背景延伸)</span><span class="bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded border border-blue-200">解决顶边</span></h3><div class="flex items-center gap-2 mb-2"><input type="number" data-ui="expansion-input" value="50" min="1" class="w-20 text-xs p-2 border border-gray-300 rounded text-center"><span class="text-xs text-gray-600">px (四周)</span></div><button data-ui="btn-expand-canvas" class="w-full py-2 bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium disabled:opacity-50"><i class="fa-solid fa-expand mr-1 text-xs"></i> 执行扩展</button></div>
                 </div>
             </div>
         </div>
@@ -913,6 +897,12 @@ function initToolV2(container) {
         num.addEventListener('input', () => { 
             let val = parseInt(num.value); if(!isNaN(val)) slider.value = Math.max(slider.min, Math.min(slider.max, val)); 
         });
+        num.addEventListener('change', () => {
+             let val = parseInt(num.value);
+             if (isNaN(val)) val = parseInt(slider.value);
+             val = Math.max(slider.min, Math.min(slider.max, val));
+             num.value = val; slider.value = val;
+        });
     }
     syncInputs(inputTolerance, numTolerance);
     syncInputs(inputMinChannel, numMinChannel);
@@ -928,190 +918,350 @@ function initToolV2(container) {
             <li class="flex items-start gap-3 opacity-60"><i class="fa-regular fa-circle checker-pending mt-1"></i><div><span class="font-semibold block text-gray-500">尺寸检测</span><span class="text-gray-400 text-xs">等待检测...</span></div></li>
             <li class="flex items-start gap-3 opacity-60"><i class="fa-regular fa-circle checker-pending mt-1"></i><div><span class="font-semibold block text-gray-500">内容占比 (85%)</span><span class="text-gray-400 text-xs">等待检测...</span></div></li>
             <li class="flex items-start gap-3 opacity-60"><i class="fa-regular fa-circle checker-pending mt-1"></i><div><span class="font-semibold block text-gray-500">纯白背景</span><span class="text-gray-400 text-xs">等待检测...</span></div></li>
+            <li class="flex items-start gap-3 opacity-60"><i class="fa-regular fa-circle checker-pending mt-1"></i><div><span class="font-semibold block text-gray-500">文件格式</span><span class="text-gray-400 text-xs">等待检测...</span></div></li>
         `;
         overallStatus.classList.add('hidden');
         errorLegend.classList.add('hidden');
     }
 
-    function renderImage(img) {
+    function renderImageToCanvas(img) {
         canvas.width = img.width; canvas.height = img.height;
         ctx.drawImage(img,0,0);
         imageDimsDisplay.innerText = `${img.width} x ${img.height} px`;
-        cleanImageData = ctx.getImageData(0,0,img.width,img.height);
+        saveCleanState();
     }
 
-    function restoreClean() {
+    function saveCleanState() {
+        cleanImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+
+    function restoreCleanState() {
         if(cleanImageData) {
-            canvas.width = cleanImageData.width; canvas.height = cleanImageData.height;
+            if (canvas.width !== cleanImageData.width || canvas.height !== cleanImageData.height) {
+                canvas.width = cleanImageData.width; canvas.height = cleanImageData.height;
+            }
             ctx.putImageData(cleanImageData, 0, 0);
         }
     }
 
-    function analyze(drawErrors = true) {
-        restoreClean();
-        const width = canvas.width, height = canvas.height;
-        const imageData = ctx.getImageData(0,0,width,height);
-        const data = imageData.data;
-        const tol = parseInt(inputTolerance.value) || 20;
-        const minC = parseInt(inputMinChannel.value) || 200;
-        
-        // 1. Dims
-        const maxSide = Math.max(width, height);
-        const dimsStatus = maxSide >= 1000 ? 'pass' : 'fail';
-        
-        // 2. Fill
-        let minX=width, maxX=0, minY=height, maxY=0, hasContent=false;
-        const thresh = 255 - tol;
-        for(let y=0; y<height; y++){
-            for(let x=0; x<width; x++){
-                const i = (y*width+x)*4;
-                const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
-                if(a===0) continue; 
-                const isBg = (r>=minC && g>=minC && b>=minC) && (r>=thresh && g>=thresh && b>=thresh);
-                if(!isBg) {
-                    if(x<minX) minX=x; if(x>maxX) maxX=x; if(y<minY) minY=y; if(y>maxY) maxY=y;
-                    hasContent=true;
-                }
-            }
-        }
-        let fillStatus = 'fail', fillMsg = '未识别主体';
-        let bbox = null;
-        if(hasContent){
-            const cw = maxX-minX+1, ch = maxY-minY+1;
-            const rate = (Math.max(cw,ch)/maxSide*100);
-            fillStatus = rate >= 85 ? 'pass' : 'fail';
-            fillMsg = `占比 ${rate.toFixed(1)}%`;
-            bbox = {minX, minY, width:cw, height:ch};
-        }
-
-        // 3. BG
-        let bgStatus = 'pass', bgMsg = '纯白';
-        // Simple ring check at depth 5
-        const depth = 5;
-        let notWhite = 0;
-        for(let x=depth; x<width-depth; x+=6) {
-             const check = (xx,yy) => {
-                 const i=(yy*width+xx)*4;
-                 if(data[i]<255 || data[i+1]<255 || data[i+2]<255) notWhite++;
-             };
-             check(x, depth); check(x, height-1-depth);
-        }
-        for(let y=depth; y<height-depth; y+=6) {
-             const check = (xx,yy) => {
-                 const i=(yy*width+xx)*4;
-                 if(data[i]<255 || data[i+1]<255 || data[i+2]<255) notWhite++;
-             };
-             check(depth, y); check(width-1-depth, y);
-        }
-        if(notWhite > 0) { bgStatus = 'fail'; bgMsg = '边缘不纯'; }
-
-        // Render UI
-        const icon = (s) => s==='pass' ? '<i class="fa-solid fa-check-circle checker-pass"></i>' : '<i class="fa-solid fa-times-circle checker-fail"></i>';
-        reportList.innerHTML = `
-            <li class="flex gap-3">${icon(dimsStatus)} <div><span class="block text-gray-700 font-semibold">尺寸</span><span class="text-xs text-gray-500">${maxSide}px</span></div></li>
-            <li class="flex gap-3">${icon(fillStatus)} <div><span class="block text-gray-700 font-semibold">占比</span><span class="text-xs text-gray-500">${fillMsg}</span></div></li>
-            <li class="flex gap-3">${icon(bgStatus)} <div><span class="block text-gray-700 font-semibold">背景</span><span class="text-xs text-gray-500">${bgMsg}</span></div></li>
-        `;
-        
-        overallStatus.className = `mt-6 p-3 rounded text-center font-bold ${dimsStatus==='pass' && fillStatus==='pass' && bgStatus==='pass' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
-        overallStatus.innerHTML = dimsStatus==='pass' && fillStatus==='pass' && bgStatus==='pass' ? '符合标准' : '存在问题';
-        overallStatus.classList.remove('hidden');
-
-        if(drawErrors){
-            if(bbox){
-                ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
-                ctx.strokeRect(bbox.minX, bbox.minY, bbox.width, bbox.height);
-                ctx.setLineDash([]);
-            }
-            if(bgStatus === 'fail') {
-                ctx.fillStyle = "red";
-                for(let x=0; x<width; x+=6) { if(data[(5*width+x)*4]<255) ctx.fillRect(x,5,4,4); }
-            }
-            errorLegend.classList.remove('hidden');
+    function setLoading(isLoading) {
+        if (isLoading) {
+            loadingOverlay.classList.remove('hidden');
+            $('btn-download').disabled = true;
+            $('btn-auto-whiten').disabled = true;
+            $('btn-api-remove').disabled = true;
+            $('btn-reupload').disabled = true;
+            $('btn-manual-check').disabled = true;
+            $('btn-expand-canvas').disabled = true;
+        } else {
+            loadingOverlay.classList.add('hidden');
+            $('btn-download').disabled = false;
+            $('btn-auto-whiten').disabled = false;
+            $('btn-api-remove').disabled = false;
+            $('btn-reupload').disabled = false;
+            $('btn-manual-check').disabled = false;
+            $('btn-expand-canvas').disabled = false;
         }
     }
 
-    // Actions
+    // --- Complex Analysis Logic (Ported) ---
+
+    function calculateContentCoverage(imageData, tolerance, minChannel) {
+        const { width, height, data } = imageData;
+        const threshold = 255 - tolerance;
+        let minX = width, maxX = 0, minY = height, maxY = 0;
+        let hasContent = false;
+
+        const isBackground = (r, g, b, a) => {
+            if (a === 0) return true; 
+            const isBright = (r >= minChannel && g >= minChannel && b >= minChannel);
+            const isTol = (r >= threshold && g >= threshold && b >= threshold);
+            return (isBright && isTol);
+        };
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+                if (!isBackground(data[i], data[i+1], data[i+2], data[i+3])) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                    hasContent = true;
+                }
+            }
+        }
+        if (!hasContent) return { status: 'fail', msg: '未检测到主体 (全白)', bbox: null };
+        const contentW = maxX - minX + 1;
+        const contentH = maxY - minY + 1;
+        const imgLong = Math.max(width, height);
+        const contLong = Math.max(contentW, contentH);
+        const rate = (contLong / imgLong * 100);
+        const pass = rate >= 85;
+        return {
+            status: pass ? 'pass' : 'fail',
+            msg: `占比 ${rate.toFixed(1)}% ${pass ? '✔' : '(建议 ≥85%)'}`,
+            bbox: { minX, minY, width: contentW, height: contentH }
+        };
+    }
+
+    function performAdvancedAnalysis(imageData, step) {
+        const { width, height, data } = imageData;
+        // 1. Multi-Ring Analysis
+        const ringDepths = [0, 3, 5, 10, 20];
+        const ringStats = ringDepths.map(depth => {
+            let total = 0, strict = 0, near254 = 0, minL = 766, minC = [255,255,255];
+            const check = (x, y) => {
+                if (x < 0 || x >= width || y < 0 || y >= height) return;
+                const i = (y * width + x) * 4;
+                let r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+                if (a === 0) { r=255; g=255; b=255; }
+                total++;
+                if (r===255 && g===255 && b===255) strict++;
+                if (r>=254 && g>=254 && b>=254) near254++;
+                const lum = r+g+b;
+                if (lum < minL) { minL = lum; minC = [r,g,b]; }
+            };
+            for(let x = depth; x < width - depth; x += step) { check(x, depth); check(x, height - 1 - depth); }
+            for(let y = depth + step; y < height - 1 - depth; y += step) { check(depth, y); check(width - 1 - depth, y); }
+            if (total === 0) total = 1;
+            return {
+                depth: depth,
+                strictPct: (strict / total * 100).toFixed(1) + '%',
+                nearPct: (near254 / total * 100).toFixed(1) + '%',
+                minRGB: `(${minC.join(',')})`
+            };
+        });
+
+        // 2. Grid Consistency
+        const cornerSize = 20; 
+        const corners = [{x: 0, y: 0}, {x: width-cornerSize, y: 0}, {x: 0, y: height-cornerSize}, {x: width-cornerSize, y: height-cornerSize}];
+        let cornerLums = [];
+        corners.forEach(c => {
+            let lumSum = 0; let count = 0;
+            for(let y=c.y; y<c.y+cornerSize; y+=2) {
+                for(let x=c.x; x<c.x+cornerSize; x+=2) {
+                    if (x>=width || y>=height) continue;
+                    const i = (y*width+x)*4;
+                    let r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+                    if(a===0) { r=255; g=255; b=255; }
+                    lumSum += (r+g+b)/3; count++;
+                }
+            }
+            cornerLums.push(count > 0 ? lumSum/count : 255);
+        });
+        const maxL = Math.max(...cornerLums);
+        const minL = Math.min(...cornerLums);
+        return { rings: ringStats, consistency: { maxDiff: (maxL - minL).toFixed(1), isConsistent: (maxL - minL) < 5 } };
+    }
+
+    function checkBorderWhitenessSimple(imageData, step) {
+        const { width, height, data } = imageData;
+        let errorPixels = [];
+        const isPixelBad = (r, g, b, a) => {
+            if (a === 0) return false; 
+            return (r < 255 || g < 255 || b < 255);
+        };
+        for (let x = 0; x < width; x += step) {
+            let idx = (0 * width + x) * 4;
+            if (isPixelBad(data[idx], data[idx+1], data[idx+2], data[idx+3])) errorPixels.push({x: x, y: 0});
+            idx = ((height - 1) * width + x) * 4;
+            if (isPixelBad(data[idx], data[idx+1], data[idx+2], data[idx+3])) errorPixels.push({x: x, y: height-1});
+        }
+        for (let y = step; y < height - step; y += step) {
+            let idx = (y * width + 0) * 4;
+            if (isPixelBad(data[idx], data[idx+1], data[idx+2], data[idx+3])) errorPixels.push({x: 0, y: y});
+            idx = (y * width + (width - 1)) * 4;
+            if (isPixelBad(data[idx], data[idx+1], data[idx+2], data[idx+3])) errorPixels.push({x: width-1, y: y});
+        }
+        return { errorPixels };
+    }
+
+    function highlightErrorPixels(pixels) {
+        ctx.fillStyle = "red";
+        pixels.forEach(p => { ctx.fillRect(p.x - 2, p.y - 2, 6, 6); });
+    }
+
+    function drawBoundingBox(bbox) {
+        ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+        ctx.strokeRect(bbox.minX, bbox.minY, bbox.width, bbox.height);
+        ctx.setLineDash([]);
+    }
+
+    function renderReport(report) {
+        const getIcon = (status) => {
+            if (status === 'pass') return '<i class="fa-solid fa-check-circle checker-pass text-lg"></i>';
+            if (status === 'fail') return '<i class="fa-solid fa-times-circle checker-fail text-lg"></i>';
+            return '<i class="fa-solid fa-exclamation-circle checker-warn text-lg"></i>';
+        };
+
+        let detailsHtml = '';
+        if (report.bg.details) {
+            const d = report.bg.details;
+            let rows = d.rings.map(r => `
+                <tr>
+                    <td>${r.depth}px</td>
+                    <td class="${parseFloat(r.strictPct)>99?'text-green-600':'text-red-500'} font-bold">${r.strictPct}</td>
+                    <td class="text-gray-500">${r.nearPct}</td>
+                    <td class="text-gray-400 text-[9px]">${r.minRGB}</td>
+                </tr>
+            `).join('');
+            const consColor = d.consistency.isConsistent ? 'text-green-600' : 'text-orange-500';
+            const consText = d.consistency.isConsistent ? '优秀' : '存在差异';
+            detailsHtml = `
+                <div class="mt-3 overflow-hidden rounded border border-gray-200">
+                    <table class="w-full text-[10px] analysis-table bg-gray-50">
+                        <thead class="bg-gray-100 text-gray-600 border-b"><tr><th>深度</th><th>纯白率</th><th>近白(≥254)</th><th>MinRGB</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="p-2 bg-white border-t border-gray-200 text-[10px] flex justify-between items-center">
+                        <span class="text-gray-600">背景一致性 (角落差异):</span>
+                        <span class="${consColor} font-bold">${d.consistency.maxDiff} (${consText})</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        reportList.innerHTML = `
+            <li class="flex items-start gap-3">${getIcon(report.dims.status)}<div class="w-full"><span class="font-semibold block text-gray-700">尺寸检测</span><span class="text-xs text-gray-500">${report.dims.msg}</span></div></li>
+            <li class="flex items-start gap-3">${getIcon(report.fill.status)}<div class="w-full"><span class="font-semibold block text-gray-700">内容占比 (85%)</span><span class="text-xs text-gray-500">${report.fill.msg}</span></div></li>
+            <li class="flex items-start gap-3">${getIcon(report.bg.status)}<div class="w-full"><span class="font-semibold block text-gray-700">纯白背景 (多环检测)</span><span class="text-xs text-gray-500">${report.bg.msg}</span>${detailsHtml}</div></li>
+            <li class="flex items-start gap-3">${getIcon(report.format.status)}<div class="w-full"><span class="font-semibold block text-gray-700">文件格式</span><span class="text-xs text-gray-500">${report.format.msg}</span></div></li>
+        `;
+
+        overallStatus.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        const allPass = report.dims.status === 'pass' && report.bg.status === 'pass' && report.format.status === 'pass' && report.fill.status === 'pass';
+        if (allPass) {
+            overallStatus.classList.add('bg-green-100', 'text-green-800');
+            overallStatus.innerHTML = '<i class="fa-solid fa-shield-check mr-2"></i>图片完全符合标准';
+        } else {
+            overallStatus.classList.add('bg-red-100', 'text-red-800');
+            overallStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i>存在合规性问题';
+        }
+    }
+
+    function analyzeImage(dims, file, drawErrors = true) {
+        restoreCleanState();
+        const tolerance = parseInt(inputTolerance.value) || 20;
+        const minChannel = parseInt(inputMinChannel.value) || 200;
+        const edgeStep = parseInt(inputEdgeStep.value) || 6;
+
+        const report = {
+            dims: { status: 'pass', msg: '尺寸合规' },
+            fill: { status: 'pass', msg: '占比合规' },
+            bg: { status: 'pass', msg: '背景为纯白', stats: null, details: null },
+            format: { status: 'pass', msg: '格式支持' }
+        };
+
+        const imageData = ctx.getImageData(0, 0, dims.width, dims.height);
+        const longestSide = Math.max(dims.width, dims.height);
+        if (longestSide < 1000) report.dims = { status: 'fail', msg: `长边仅 ${longestSide}px (建议 >= 1000px)` };
+
+        const validTypes = ['image/jpeg', 'image/png', 'image/tiff', 'image/gif'];
+        if (file && !validTypes.includes(file.type)) report.format = { status: 'fail', msg: `当前格式 ${file.type} 可能不支持` };
+
+        const fillStats = calculateContentCoverage(imageData, tolerance, minChannel);
+        report.fill.status = fillStats.status; report.fill.msg = fillStats.msg;
+
+        const advStats = performAdvancedAnalysis(imageData, edgeStep);
+        let bgStatus = 'pass'; let bgMsg = '背景合规 (纯白)';
+        advStats.rings.forEach(r => { if (parseFloat(r.strictPct) < 99.0) { bgStatus = 'fail'; bgMsg = `边缘不纯 (偏移${r.depth}px处纯白仅${r.strictPct})`; }});
+        
+        if (drawErrors) {
+            if (bgStatus !== 'pass') {
+                const simpleCheck = checkBorderWhitenessSimple(imageData, edgeStep);
+                highlightErrorPixels(simpleCheck.errorPixels);
+            }
+            if (fillStats.bbox) drawBoundingBox(fillStats.bbox);
+            errorLegend.classList.remove('hidden');
+        } else {
+            errorLegend.classList.add('hidden');
+        }
+        report.bg.status = bgStatus; report.bg.msg = bgMsg; report.bg.details = advStats;
+        renderReport(report);
+    }
+
+    // --- Events ---
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if(!file) return;
+        if (!file.type.startsWith('image/')) return alert('请上传图片文件');
         currentFile = file;
         const reader = new FileReader();
-        reader.onload = (ev) => {
+        reader.onload = (event) => {
             originalImage = new Image();
             originalImage.onload = () => {
-                renderImage(originalImage);
+                renderImageToCanvas(originalImage);
                 dropZone.classList.add('hidden');
                 previewContainer.classList.remove('hidden');
                 resetReportUI();
             };
-            originalImage.src = ev.target.result;
+            originalImage.src = event.target.result;
         };
         reader.readAsDataURL(file);
     });
 
-    $('btn-reset').addEventListener('click', () => { if(originalImage) { renderImage(originalImage); resetReportUI(); }});
-    $('btn-reupload').addEventListener('click', () => { currentFile=null; fileInput.value=''; previewContainer.classList.add('hidden'); dropZone.classList.remove('hidden'); });
-    $('btn-manual-check').addEventListener('click', () => analyze(true));
-    $('btn-download').addEventListener('click', () => { const a=document.createElement('a'); a.download='fixed.jpg'; a.href=canvas.toDataURL('image/jpeg',0.95); a.click(); });
+    $('btn-reset').addEventListener('click', () => { if(originalImage) { renderImageToCanvas(originalImage); resetReportUI(); errorLegend.classList.add('hidden'); }});
+    $('btn-reupload').addEventListener('click', () => { currentFile=null; originalImage=null; cleanImageData=null; fileInput.value=''; previewContainer.classList.add('hidden'); dropZone.classList.remove('hidden'); resetReportUI(); });
+    $('btn-manual-check').addEventListener('click', () => { if(originalImage) analyzeImage({width:canvas.width, height:canvas.height}, currentFile, true); });
+    $('btn-download').addEventListener('click', () => { const a=document.createElement('a'); a.download='amazon_fixed.jpg'; a.href=canvas.toDataURL('image/jpeg',0.95); a.click(); });
 
     $('btn-auto-whiten').addEventListener('click', () => {
-        if(!cleanImageData) return;
-        restoreClean();
-        loadingOverlay.classList.remove('hidden');
+        if(originalImage) restoreCleanState();
+        setLoading(true);
         setTimeout(() => {
-            const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-            const data = img.data;
-            const tol = parseInt(inputTolerance.value);
-            const minC = parseInt(inputMinChannel.value);
-            const th = 255 - tol;
-            for(let i=0; i<data.length; i+=4){
-                const r=data[i],g=data[i+1],b=data[i+2];
-                if(r>=minC && g>=minC && b>=minC && r>=th && g>=th && b>=th){
-                    data[i]=255; data[i+1]=255; data[i+2]=255; data[i+3]=255;
-                }
+            const width = canvas.width; const height = canvas.height;
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            const tolerance = parseInt(inputTolerance.value) || 20;
+            const minChannel = parseInt(inputMinChannel.value) || 200;
+            const threshold = 255 - tolerance;
+            for (let i = 0; i < data.length; i += 4) {
+                const r=data[i], g=data[i+1], b=data[i+2];
+                const isBright = (r >= minChannel && g >= minChannel && b >= minChannel);
+                const isTol = (r >= threshold && g >= threshold && b >= threshold);
+                if (isBright && isTol) { data[i]=255; data[i+1]=255; data[i+2]=255; data[i+3]=255; }
             }
-            ctx.putImageData(img,0,0);
-            cleanImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            loadingOverlay.classList.add('hidden');
-            analyze(true);
-        }, 50);
-    });
-    
-    // Canvas Expand
-    $('btn-expand-canvas').addEventListener('click', () => {
-        const pad = parseInt($('expansion-input').value) || 50;
-        restoreClean();
-        const temp = new Image();
-        temp.onload = () => {
-            canvas.width += pad*2; canvas.height += pad*2;
-            ctx.fillStyle='#FFF'; ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.drawImage(temp, pad, pad);
-            cleanImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            imageDimsDisplay.innerText = `${canvas.width} x ${canvas.height} px`;
-            analyze(true);
-        };
-        temp.src = canvas.toDataURL();
+            ctx.putImageData(imageData, 0, 0);
+            saveCleanState(); setLoading(false);
+            analyzeImage({ width, height }, currentFile, true);
+        }, 100);
     });
 
-    // API Remove
+    $('btn-expand-canvas').addEventListener('click', () => {
+        const padding = parseInt($('expansion-input').value) || 0;
+        if(padding<=0) return alert("请输入有效像素值");
+        restoreCleanState(); setLoading(true);
+        const tempImg = new Image();
+        tempImg.onload = () => {
+            const nw = tempImg.width + padding*2; const nh = tempImg.height + padding*2;
+            canvas.width = nw; canvas.height = nh;
+            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,nw,nh);
+            ctx.drawImage(tempImg, padding, padding);
+            saveCleanState();
+            imageDimsDisplay.innerText = `${nw} x ${nh} px`;
+            setLoading(false);
+            analyzeImage({width:nw, height:nh}, currentFile, true);
+        };
+        tempImg.src = canvas.toDataURL();
+    });
+
     $('btn-api-remove').addEventListener('click', async () => {
         const key = $('api-key-input').value.trim();
-        if(!key) return alert('请输入 API Key');
-        restoreClean();
-        loadingOverlay.classList.remove('hidden');
+        if(!key) return alert("请输入 Remove.bg API Key");
+        restoreCleanState(); setLoading(true);
         canvas.toBlob(async (blob) => {
             const fd = new FormData(); fd.append('image_file', blob); fd.append('size','auto'); fd.append('bg_color','white');
             try {
                 const res = await fetch('https://api.remove.bg/v1.0/removebg', { method:'POST', headers:{'X-Api-Key':key}, body:fd });
                 if(res.ok) {
                     const b = await res.blob();
-                    const img = new Image();
-                    img.onload = () => { renderImage(img); loadingOverlay.classList.add('hidden'); analyze(true); };
-                    img.src = URL.createObjectURL(b);
-                } else throw new Error('API Error');
-            } catch(e) { alert(e.message); loadingOverlay.classList.add('hidden'); }
-        });
+                    const resultImg = new Image();
+                    resultImg.onload = () => { renderImageToCanvas(resultImg); setLoading(false); analyzeImage(resultImg, currentFile||{type:'image/png'}, true); alert("AI 抠图完成！"); };
+                    resultImg.src = URL.createObjectURL(b);
+                } else { const err=await res.json(); throw new Error(err.errors?err.errors[0].title:'API Error'); }
+            } catch(e) { setLoading(false); alert("API 调用失败: "+e.message); }
+        }, 'image/png');
     });
 }
 </script>
