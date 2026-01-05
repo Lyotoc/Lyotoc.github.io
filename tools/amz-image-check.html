@@ -302,6 +302,9 @@ function initToolV1(container) {
           <button class="btn" data-ui="analyzeBtn" disabled>检测</button>
           <button class="btn primary" data-ui="fixBtn" disabled>修复白底</button>
           <button class="btn" data-ui="downloadBtn" disabled>下载 PNG</button>
+          <label style="font-size:12px; display:flex; align-items:center; gap:4px; margin-left:8px; cursor:pointer">
+            <input type="checkbox" data-ui="dlAnnotations"> 包含标注
+          </label>
         </div>
         <div class="chips" data-ui="chips"></div>
         <div class="hr"></div>
@@ -343,6 +346,7 @@ function initToolV1(container) {
     const analyzeBtn = $('analyzeBtn');
     const fixBtn = $('fixBtn');
     const downloadBtn = $('downloadBtn');
+    const dlAnnotations = $('dlAnnotations');
 
     const tol = $('tol');
     const minBright = $('minBright');
@@ -788,9 +792,35 @@ function initToolV1(container) {
 
     analyzeBtn.addEventListener('click', ()=>{ if(imgBitmap) runAnalyze(); });
     fixBtn.addEventListener('click', ()=>{ if(imgBitmap) runFix(); });
-    downloadBtn.addEventListener('click', ()=>{ 
+    
+    // Download logic updated
+    downloadBtn.addEventListener('click', () => { 
         if(!imgBitmap) return; 
-        const a=document.createElement('a'); a.download='v1-fixed.png'; a.href=outCanvas.toDataURL('image/png'); a.click(); 
+        
+        const sourceBitmap = outCanvas._lastBitmap || imgBitmap;
+        let blobSourceCanvas = outCanvas;
+
+        // If not checking "Include Annotations", create a clean temp canvas
+        if (!dlAnnotations.checked && sourceBitmap) {
+            const temp = document.createElement('canvas');
+            temp.width = outCanvas.width;
+            temp.height = outCanvas.height;
+            const tCtx = temp.getContext('2d');
+            tCtx.drawImage(sourceBitmap, 0, 0);
+            blobSourceCanvas = temp;
+        }
+
+        blobSourceCanvas.toBlob((blob) => {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); 
+            a.download = 'v1-fixed.png'; 
+            a.href = url; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 'image/png');
     });
 }
 
@@ -830,7 +860,13 @@ function initToolV2(container) {
                     </div>
                     <div class="mt-4 flex flex-wrap gap-3 justify-between items-center border-t pt-4">
                         <div class="text-xs text-gray-400">提示：主体识别基于当前容差设置，请先调整容差以准确识别。</div>
-                        <div class="flex gap-2"><button data-ui="btn-reset" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium border rounded hover:bg-gray-50 transition"><i class="fa-solid fa-rotate-left mr-1"></i> 还原原图</button><button data-ui="btn-download" class="px-4 py-2 bg-amazon-light hover:bg-gray-700 text-white text-sm font-bold rounded shadow disabled:opacity-50 disabled:cursor-not-allowed transition"><i class="fa-solid fa-download mr-1"></i> 下载修复结果</button></div>
+                        <div class="flex gap-2 items-center">
+                            <label class="text-xs text-gray-500 flex items-center gap-1 cursor-pointer mr-2 select-none">
+                                <input type="checkbox" data-ui="dl-annotations"> 包含标注
+                            </label>
+                            <button data-ui="btn-reset" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium border rounded hover:bg-gray-50 transition"><i class="fa-solid fa-rotate-left mr-1"></i> 还原原图</button>
+                            <button data-ui="btn-download" class="px-4 py-2 bg-amazon-light hover:bg-gray-700 text-white text-sm font-bold rounded shadow disabled:opacity-50 disabled:cursor-not-allowed transition"><i class="fa-solid fa-download mr-1"></i> 下载修复结果</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -878,6 +914,7 @@ function initToolV2(container) {
     const settingsToggle = $('settings-toggle');
     const settingsPanel = $('settings-panel');
     const settingsChevron = $('settings-chevron');
+    const dlAnnotations = $('dl-annotations');
     
     const inputTolerance = $('input-tolerance');
     const numTolerance = $('num-tolerance');
@@ -1204,7 +1241,35 @@ function initToolV2(container) {
     $('btn-reset').addEventListener('click', () => { if(originalImage) { renderImageToCanvas(originalImage); resetReportUI(); errorLegend.classList.add('hidden'); }});
     $('btn-reupload').addEventListener('click', () => { currentFile=null; originalImage=null; cleanImageData=null; fileInput.value=''; previewContainer.classList.add('hidden'); dropZone.classList.remove('hidden'); resetReportUI(); });
     $('btn-manual-check').addEventListener('click', () => { if(originalImage) analyzeImage({width:canvas.width, height:canvas.height}, currentFile, true); });
-    $('btn-download').addEventListener('click', () => { const a=document.createElement('a'); a.download='amazon_fixed.jpg'; a.href=canvas.toDataURL('image/jpeg',0.95); a.click(); });
+    
+    // Updated Download Logic for V2
+    $('btn-download').addEventListener('click', () => { 
+        if(!originalImage) return; 
+        
+        let blobSourceCanvas = canvas;
+
+        // If not checked, download clean version (without drawings)
+        if (!dlAnnotations.checked && cleanImageData) {
+            const temp = document.createElement('canvas');
+            temp.width = canvas.width;
+            temp.height = canvas.height;
+            const tCtx = temp.getContext('2d');
+            tCtx.putImageData(cleanImageData, 0, 0);
+            blobSourceCanvas = temp;
+        }
+
+        blobSourceCanvas.toBlob((blob) => {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const a=document.createElement('a'); 
+            a.download='amazon_fixed.jpg'; 
+            a.href=url; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 'image/jpeg', 0.95);
+    });
 
     $('btn-auto-whiten').addEventListener('click', () => {
         if(originalImage) restoreCleanState();
