@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon 主图工具箱 (集成版)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Amazon+Ember:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 布局与框架样式 --- */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1e1e1e; }
+        
+        #app-container { display: flex; height: 100vh; }
+        
+        /* 侧边栏 */
+        #sidebar {
+            width: 260px;
+            background: #111827; /* Gray 900 */
+            color: #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #374151;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #374151; background: #0f1118; }
+        .sidebar-title { font-size: 1.1rem; font-weight: bold; display: flex; items-center; gap: 10px; }
+        
+        .create-actions { padding: 15px; display: grid; gap: 10px; border-bottom: 1px solid #374151; }
+        .btn-create {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #4b5563;
+            background: #1f2937;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        .btn-create:hover { background: #374151; border-color: #6b7280; }
+        .btn-create i { width: 20px; text-align: center; }
+
+        .instance-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .instance-item {
+            padding: 10px 12px;
+            margin-bottom: 5px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+        .instance-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .instance-item.active {
+            background: #2563eb; /* Blue 600 */
+            color: white;
+            border-color: #3b82f6;
+        }
+        .btn-close {
+            opacity: 0.6;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .btn-close:hover { opacity: 1; background: rgba(0,0,0,0.2); }
+
+        /* 工作区 */
+        #workspace { flex: 1; background: #000; position: relative; overflow: hidden; }
+        .tool-container {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            display: none; /* 默认隐藏 */
+            background: #fff;
+        }
+        .tool-container.active { display: block; }
+
+        /* --- Tool 1 (Dark Mode) CSS Scope --- */
+        /* 重写 Tool 1 CSS 以适应 .tool-v1 容器且不使用 ID 选择器 */
+        .tool-v1 {
+            --bg: #0b0c10; --card: #14161f; --txt: #e8e8ea; --muted: #b6b7bd; --line: #2a2d3a;
+            --good: #2bd576; --warn: #ffcc00; --bad: #ff4d4d;
+            background: linear-gradient(180deg,#0b0c10,#0b0c10 40%,#090a0d);
+            color: var(--txt);
+            font-family: ui-sans-serif,system-ui,-apple-system,sans-serif;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .tool-v1 header { padding: 14px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: rgba(11,12,16,.92); backdrop-filter: blur(10px); z-index: 5; }
+        .tool-v1 h1 { margin: 0; font-size: 16px; font-weight: 800; }
+        .tool-v1 main { max-width: 1220px; margin: 0 auto; padding: 14px; }
+        .tool-v1 .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 1040px) { .tool-v1 .grid { grid-template-columns: 420px 1fr; } }
+        .tool-v1 .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+        .tool-v1 label { font-size: 12px; color: var(--muted); }
+        .tool-v1 input[type=file] { width: 100%; color: var(--muted); }
+        .tool-v1 input[type=range] { width: 100%; }
+        .tool-v1 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+        .tool-v1 .btn { appearance: none; border: 1px solid var(--line); background: #0f1118; color: var(--txt); padding: 10px 12px; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .tool-v1 .btn:hover { border-color: #3a3f55; }
+        .tool-v1 .btn.primary { background: #1b2350; border-color: #2d3aa0; }
+        .tool-v1 .btn.primary:hover { filter: brightness(1.05); }
+        .tool-v1 .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .tool-v1 .hr { height: 1px; background: var(--line); margin: 10px 0; }
+        .tool-v1 .mono { font-family: ui-monospace,monospace; }
+        .tool-v1 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tool-v1 .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--muted); }
+        .tool-v1 .chip.good { color: var(--good); border-color: rgba(43,213,118,.35); }
+        .tool-v1 .chip.warn { color: var(--warn); border-color: rgba(255,204,0,.35); }
+        .tool-v1 .chip.bad { color: var(--bad); border-color: rgba(255,77,77,.35); }
+        .tool-v1 details { border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: #0f1118; }
+        .tool-v1 details summary { cursor: pointer; color: var(--txt); font-weight: 800; font-size: 12px; }
+        .tool-v1 .kv { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; font-size: 12px; }
+        .tool-v1 .kv div { padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: #0f1118; }
+        .tool-v1 .kv .k { color: var(--muted); }
+        .tool-v1 .kv .v { font-weight: 800; }
+        .tool-v1 .preview { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 1040px) { .tool-v1 .preview { grid-template-columns: 1fr 1fr; } }
+        .tool-v1 .pane { border: 1px dashed #3a3f55; border-radius: 14px; padding: 10px; background: rgba(255,255,255,.02); }
+        .tool-v1 .pane h2 { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 800; }
+        .tool-v1 canvas { width: 100%; height: auto; border-radius: 10px; background: white; display: block; }
+        .tool-v1 .mini { margin-top: 8px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+        .tool-v1 table { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--line); background: #0f1118; margin-top: 8px; color: var(--txt); }
+        .tool-v1 th, .tool-v1 td { padding: 6px 8px; border-bottom: 1px solid var(--line); font-size: 12px; text-align: left; vertical-align: top; }
+        .tool-v1 th { color: var(--muted); font-weight: 800; }
+        .tool-v1 tr:last-child td { border-bottom: none; }
+        .tool-v1 .right { text-align: right; }
+
+        /* --- Tool 2 (Light Mode) CSS Scope --- */
+        .tool-v2 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f3f3;
+            height: 100%;
+            overflow-y: auto;
+            color: #111;
+        }
+        .tool-v2 .amazon-orange { color: #FF9900; }
+        .tool-v2 .bg-amazon-dark { background-color: #232F3E; }
+        .tool-v2 .bg-amazon-light { background-color: #37475A; }
+        .tool-v2 .btn-primary { background-color: #FF9900; color: #111; transition: all 0.2s; }
+        .tool-v2 .btn-primary:hover { background-color: #e88b00; }
+        .tool-v2 .checker-pass { color: #06d6a0; }
+        .tool-v2 .checker-fail { color: #ef476f; }
+        .tool-v2 .checker-warn { color: #ffd166; }
+        .tool-v2 .checker-pending { color: #cbd5e1; }
+        .tool-v2 .transparency-grid {
+            background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            background-color: #fff;
+        }
+        /* Scoped Range Slider for Tool 2 */
+        .tool-v2 input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        .tool-v2 input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #FF9900; cursor: pointer; margin-top: -6px; box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d; }
+        .tool-v2 input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e5e7eb; border-radius: 2px; }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #4b5563;
+        }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; color: #374151; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <i class="fa-brands fa-amazon"></i> <span>工具箱</span>
+            </div>
+        </div>
+        
+        <div class="create-actions">
+            <button class="btn-create" onclick="App.createInstance('v1')">
+                <i class="fa-solid fa-microscope" style="color:#2bd576"></i>
+                深度质检 (gpt提供)
+            </button>
+            <button class="btn-create" onclick="App.createInstance('v2')">
+                <i class="fa-solid fa-wand-magic-sparkles" style="color:#FF9900"></i>
+                合规修复 (gemini提供)
+            </button>
+        </div>
+
+        <div class="p-3 text-xs text-gray-500 font-bold uppercase tracking-wider">运行中的实例</div>
+        <div id="instance-list" class="instance-list">
+            <!-- Instances injected here -->
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main id="workspace">
+        <div id="empty-placeholder" class="empty-state">
+            <i class="fa-solid fa-layer-group"></i>
+            <h2 class="text-xl font-bold">准备就绪</h2>
+            <p class="mt-2 text-sm">请从左侧栏选择一个工具开启</p>
+        </div>
+        <!-- Tool containers injected here -->
+    </main>
+</div>
+
+<script>
+/**
+ * Application Manager
+ * Handles creating instances, tab switching, and DOM isolation.
+ */
+const App = {
+    instances: [],
+    counter: 0,
+
+    createInstance(type) {
+        this.counter++;
+        const id = `inst-${this.counter}`;
+        const title = type === 'v1' ? `深度质检 #${this.counter}` : `合规修复 #${this.counter}`;
+        
+        // 1. Create Sidebar Item
+        const listItem = document.createElement('div');
+        listItem.className = 'instance-item active';
+        listItem.dataset.id = id;
+        listItem.innerHTML = `
+            <span onclick="App.switchTab('${id}')" class="flex-1 truncate">${title}</span>
+            <i class="fa-solid fa-xmark btn-close" onclick="App.closeInstance('${id}', event)"></i>
+        `;
+        document.getElementById('instance-list').appendChild(listItem);
+
+        // 2. Create Workspace Container
+        const container = document.createElement('div');
+        container.id = id;
+        container.className = `tool-container active ${type === 'v1' ? 'tool-v1' : 'tool-v2'}`;
+        document.getElementById('workspace').appendChild(container);
+
+        // 3. Initialize Logic based on Type
+        if (type === 'v1') {
+            initToolV1(container);
+        } else {
+            initToolV2(container);
+        }
+
+        // 4. Update State
+        this.instances.push({ id, type });
+        this.switchTab(id);
+        
+        // Hide empty state
+        document.getElementById('empty-placeholder').style.display = 'none';
+    },
+
+    switchTab(id) {
+        // Sidebar active state
+        document.querySelectorAll('.instance-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.id === id);
+        });
+        // Workspace visible state
+        document.querySelectorAll('.tool-container').forEach(el => {
+            el.classList.toggle('active', el.id === id);
+        });
+    },
+
+    closeInstance(id, event) {
+        event.stopPropagation();
+        
+        // Remove DOM
+        const sidebarItem = document.querySelector(`.instance-item[data-id="${id}"]`);
+        if (sidebarItem) sidebarItem.remove();
+        
+        const container = document.getElementById(id);
+        if (container) container.remove();
+
+        // Update data
+        this.instances = this.instances.filter(i => i.id !== id);
+
+        // Switch to last available or show empty
+        if (this.instances.length > 0) {
+            this.switchTab(this.instances[this.instances.length - 1].id);
+        } else {
+            document.getElementById('empty-placeholder').style.display = 'flex';
+        }
+    }
+};
+
+/**
+ * =============================================================================
+ * TOOL 1: 深度质检 (Dark Mode) - Adapted Factory
+ * =============================================================================
+ */
+function initToolV1(container) {
+    // Inject HTML Structure (Converted IDs to data-ui to prevent global conflicts)
+    container.innerHTML = `
+    <header><h1>Amazon 主图质检：白底 + 主体占比（离线单页）</h1></header>
+    <main class="grid">
+      <section class="card">
+        <label>选择图片</label>
+        <input data-ui="file" type="file" accept="image/*" />
+        <div class="hr"></div>
+        <div class="kv"><div class="k">tolerance</div><div class="v"><span data-ui="tolVal">20</span></div></div>
+        <input data-ui="tol" type="range" min="0" max="100" value="20" />
+        <div class="kv"><div class="k">minBright</div><div class="v"><span data-ui="minVal">200</span></div></div>
+        <input data-ui="minBright" type="range" min="0" max="255" value="200" />
+        <div class="row" style="margin-top:10px">
+          <button class="btn" data-ui="analyzeBtn" disabled>检测</button>
+          <button class="btn primary" data-ui="fixBtn" disabled>修复白底</button>
+          <button class="btn" data-ui="downloadBtn" disabled>下载 PNG</button>
+        </div>
+        <div class="chips" data-ui="chips"></div>
+        <div class="hr"></div>
+        <details>
+          <summary>高级（可不改）</summary>
+          <div class="kv"><div class="k">maskTolMul</div><div class="v"><span data-ui="maskMulVal">0.8</span></div></div>
+          <input data-ui="maskTolMul" type="range" min="0.3" max="1.5" step="0.1" value="0.8" />
+          <div class="kv"><div class="k">gridN</div><div class="v"><span data-ui="gridVal">20</span></div></div>
+          <input data-ui="gridN" type="range" min="10" max="40" value="20" />
+          <div class="kv"><div class="k">bgNear (≥)</div><div class="v"><span data-ui="bgNearVal">252</span></div></div>
+          <input data-ui="bgNear" type="range" min="240" max="255" value="252" />
+          <div class="kv"><div class="k">objMinNonBgRatio</div><div class="v"><span data-ui="objMinVal">0.08</span></div></div>
+          <input data-ui="objMinNonBgRatio" type="range" min="0.01" max="0.30" step="0.01" value="0.08" />
+          <div class="kv"><div class="k">ringMax(px)</div><div class="v"><span data-ui="ringMaxVal">24</span></div></div>
+          <input data-ui="ringMax" type="range" min="6" max="120" value="24" />
+          <div class="kv"><div class="k">rings</div><div class="v"><span data-ui="ringCountVal">5</span></div></div>
+          <input data-ui="ringCount" type="range" min="3" max="10" value="5" />
+          <div class="mini">线缆/细长产品：若主体识别偏小，把 <span class="mono">objMinNonBgRatio</span> 调到 0.03–0.06。</div>
+        </details>
+      </section>
+      <section class="card">
+        <div class="preview">
+          <div class="pane"><h2>原图</h2><canvas data-ui="src" width="10" height="10"></canvas><div class="mini" data-ui="srcMini"></div></div>
+          <div class="pane"><h2>修复后</h2><canvas data-ui="out" width="10" height="10"></canvas><div class="mini" data-ui="outMini"></div></div>
+        </div>
+        <details style="margin-top:12px"><summary>详情（rings / grid）</summary><div data-ui="detail"></div></details>
+      </section>
+    </main>
+    `;
+
+    // Scoped Selector Helper
+    const $ = (name) => container.querySelector(`[data-ui="${name}"]`);
+
+    const fileEl = $('file');
+    const srcCanvas = $('src');
+    const outCanvas = $('out');
+    const srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
+    const outCtx = outCanvas.getContext('2d', { willReadFrequently: true });
+
+    const analyzeBtn = $('analyzeBtn');
+    const fixBtn = $('fixBtn');
+    const downloadBtn = $('downloadBtn');
+
+    const tol = $('tol');
+    const minBright = $('minBright');
+    const maskTolMul = $('maskTolMul');
+    const gridN = $('gridN');
+    const bgNear = $('bgNear');
+    const objMinNonBgRatio = $('objMinNonBgRatio');
+    const ringMax = $('ringMax');
+    const ringCount = $('ringCount');
+
+    const tolVal = $('tolVal');
+    const minVal = $('minVal');
+    const maskMulVal = $('maskMulVal');
+    const gridVal = $('gridVal');
+    const bgNearVal = $('bgNearVal');
+    const objMinVal = $('objMinVal');
+    const ringMaxVal = $('ringMaxVal');
+    const ringCountVal = $('ringCountVal');
+
+    const chips = $('chips');
+    const srcMini = $('srcMini');
+    const outMini = $('outMini');
+    const detail = $('detail');
+
+    let imgBitmap = null;
+
+    // --- Core Logic from File 1 (Unchanged logic, just scoped) ---
+    const clamp = (x,a,b) => Math.max(a, Math.min(b,x));
+    const pct = (n, total) => (100*n/Math.max(1,total)).toFixed(2);
+
+    function setChip(text, kind){
+        const el = document.createElement('span');
+        el.className = `chip ${kind}`;
+        el.textContent = text;
+        chips.appendChild(el);
+    }
+
+    function resetUI(){
+        chips.innerHTML='';
+        srcMini.textContent='';
+        outMini.textContent='';
+        detail.innerHTML='';
+        downloadBtn.disabled = true;
+    }
+
+    function resizeCanvases(w,h){
+        srcCanvas.width=w; srcCanvas.height=h;
+        outCanvas.width=w; outCanvas.height=h;
+    }
+
+    function toRgbHex(r,g,b){
+        const hx = (n) => n.toString(16).padStart(2,'0');
+        return `#${hx(r)}${hx(g)}${hx(b)}`.toUpperCase();
+    }
+
+    function median(arr){
+        if(!arr.length) return 255;
+        const a = Array.from(arr).sort((x,y)=>x-y);
+        const m = Math.floor(a.length/2);
+        return a.length%2 ? a[m] : Math.round((a[m-1]+a[m])/2);
+    }
+
+    function getAnalysisImageData(ctx){
+        const w = ctx.canvas.width, h = ctx.canvas.height;
+        const maxSide = Math.max(w,h);
+        const target = 900; 
+        const scale = maxSide>target ? (target/maxSide) : 1;
+        if(scale === 1){
+            return { img: ctx.getImageData(0,0,w,h), scale:1 };
+        }
+        const sw = Math.max(1, Math.round(w*scale));
+        const sh = Math.max(1, Math.round(h*scale));
+        const off = document.createElement('canvas');
+        off.width = sw; off.height = sh;
+        const octx = off.getContext('2d', { willReadFrequently:true });
+        octx.drawImage(ctx.canvas, 0,0, sw, sh);
+        return { img: octx.getImageData(0,0, sw, sh), scale };
+    }
+
+    function sampleBorderRef(imageData, step){
+        const {width:w,height:h,data} = imageData;
+        const rs=[],gs=[],bs=[];
+        const s = clamp(step|0,1,50);
+        const push=(x,y)=>{
+            const i=(y*w+x)*4;
+            rs.push(data[i]); gs.push(data[i+1]); bs.push(data[i+2]);
+        };
+        for(let x=0;x<w;x+=s){ push(x,0); push(x,h-1); }
+        for(let y=0;y<h;y+=s){ push(0,y); push(w-1,y); }
+        const c = Math.max(2, Math.min(30, Math.floor(Math.min(w,h)*0.03)));
+        for(let y=0;y<c;y+=Math.max(1,Math.floor(s/2))){
+            for(let x=0;x<c;x+=Math.max(1,Math.floor(s/2))){
+                push(x,y); push(w-1-x,y); push(x,h-1-y); push(w-1-x,h-1-y);
+            }
+        }
+        return { ref:{r:median(rs), g:median(gs), b:median(bs)} };
+    }
+
+    function backgroundMask(imageData, opts){
+        const {width:w,height:h,data} = imageData;
+        const tolerance = clamp(opts.tolerance|0,0,255);
+        const minB = clamp(opts.minBright|0,0,255);
+        const step = clamp(opts.sampleStep|0,1,50);
+
+        const {ref} = sampleBorderRef(imageData, step);
+        const tol2 = tolerance*tolerance;
+        const dist2 = (r,g,b)=>{ const dr=r-ref.r, dg=g-ref.g, db=b-ref.b; return dr*dr+dg*dg+db*db; };
+        const isBgCandidate=(r,g,b)=>{ if(r<minB||g<minB||b<minB) return false; return dist2(r,g,b) <= tol2; };
+
+        const visited = new Uint8Array(w*h);
+        const q = new Uint32Array(w*h);
+        let head=0, tail=0;
+        const push=(idx)=>{
+            if(visited[idx]) return;
+            const i=idx*4;
+            const r=data[i], g=data[i+1], b=data[i+2];
+            if(!isBgCandidate(r,g,b)) return;
+            visited[idx]=1; q[tail++] = idx;
+        };
+
+        for(let x=0;x<w;x++){ push(x); push((h-1)*w + x); }
+        for(let y=0;y<h;y++){ push(y*w); push(y*w + (w-1)); }
+
+        while(head<tail){
+            const idx = q[head++];
+            const x = idx % w;
+            const y = (idx - x) / w;
+            if(x>0) push(idx-1); if(x<w-1) push(idx+1); if(y>0) push(idx-w); if(y<h-1) push(idx+w);
+        }
+        return { mask:visited, ref, bgCount:tail };
+    }
+
+    function analyzeMaskWhite(imageData, mask){
+        const {width:w,height:h,data} = imageData;
+        let total=0, exact=0, near1=0;
+        let minR=255,minG=255,minB=255;
+        for(let idx=0; idx<w*h; idx++){
+            if(!mask[idx]) continue;
+            const i=idx*4;
+            const r=data[i], g=data[i+1], b=data[i+2];
+            total++;
+            if(r===255&&g===255&&b===255) exact++;
+            if(r>=254&&g>=254&&b>=254) near1++;
+            if(r<minR) minR=r; if(g<minG) minG=g; if(b<minB) minB=b;
+        }
+        return { total, exactPct:pct(exact,total), near1Pct:pct(near1,total), min:{r:minR,g:minG,b:minB} };
+    }
+
+    function analyzeGridUniformity(imageData, N, mask=null){
+        const {width:w,height:h,data} = imageData;
+        const n = clamp(N|0, 6, 80);
+        const cellW = w/n, cellH = h/n;
+        let lumMin=Infinity, lumMax=-Infinity, lumSum=0, count=0;
+        const lum=(r,g,b)=>0.2126*r+0.7152*g+0.0722*b;
+
+        for(let gy=0; gy<n; gy++){
+            for(let gx=0; gx<n; gx++){
+                const x = clamp(Math.floor((gx+0.5)*cellW), 0, w-1);
+                const y = clamp(Math.floor((gy+0.5)*cellH), 0, h-1);
+                const idx = y*w+x;
+                if(mask && !mask[idx]) continue;
+                const i=idx*4;
+                const v = lum(data[i], data[i+1], data[i+2]);
+                lumSum += v; count++;
+                if(v<lumMin) lumMin=v;
+                if(v>lumMax) lumMax=v;
+            }
+        }
+        const mean = lumSum/Math.max(1,count);
+        let varSum=0;
+        for(let gy=0; gy<n; gy++){
+            for(let gx=0; gx<n; gx++){
+                const x = clamp(Math.floor((gx+0.5)*cellW), 0, w-1);
+                const y = clamp(Math.floor((gy+0.5)*cellH), 0, h-1);
+                const idx = y*w+x;
+                if(mask && !mask[idx]) continue;
+                const i=idx*4;
+                const v = lum(data[i], data[i+1], data[i+2]);
+                const d = v-mean;
+                varSum += d*d;
+            }
+        }
+        const std = Math.sqrt(varSum/Math.max(1,count));
+        const range = lumMax - lumMin;
+        return { range, std, score: range + std };
+    }
+
+    function buildRingDepths(w,h, count, maxDepth){
+        const maxD = clamp(maxDepth|0, 1, Math.floor(Math.min(w,h)/2)-1);
+        const c = clamp(count|0, 2, 20);
+        const depths=[];
+        for(let i=0;i<c;i++){
+            const t=i/(c-1);
+            depths.push(Math.round(Math.pow(t, 1.3)*maxD));
+        }
+        return Array.from(new Set(depths)).sort((a,b)=>a-b);
+    }
+
+    function ringNearWhiteWorst(imageData, depths, step){
+        const {width:w,height:h,data} = imageData;
+        const s = clamp(step|0, 1, 50);
+        const evalRing = (d)=>{
+            const x0=d,y0=d,x1=w-1-d,y1=h-1-d;
+            let total=0, near1=0;
+            const check=(x,y)=>{
+                const i=(y*w+x)*4;
+                const r=data[i], g=data[i+1], b=data[i+2];
+                total++;
+                if(r>=254&&g>=254&&b>=254) near1++;
+            };
+            for(let x=x0;x<=x1;x+=s){ check(x,y0); check(x,y1); }
+            for(let y=y0;y<=y1;y+=s){ check(x0,y); check(x1,y); }
+            return { d, near1Pct: parseFloat(pct(near1,total)) };
+        };
+
+        let worst = { d:0, near1Pct:100 };
+        const rows=[];
+        for(const d of depths){
+            const r = evalRing(d);
+            rows.push(r);
+            if(r.near1Pct < worst.near1Pct) worst = r;
+        }
+        return { worst, rows };
+    }
+
+    function estimateContent(imageData, opts){
+        const {width:w,height:h,data} = imageData;
+        const N = clamp(opts.gridN|0, 8, 80);
+        const cellW = w/N, cellH = h/N;
+        const bgT = clamp(opts.bgNear|0, 0, 255);
+        const minRatio = Math.max(0.001, Math.min(0.999, opts.minNonBgRatio));
+        
+        let nonWhite=0;
+        for(let i=0;i<data.length;i+=4){
+            const r=data[i], g=data[i+1], b=data[i+2];
+            if(!(r>=bgT && g>=bgT && b>=bgT)) nonWhite++;
+        }
+        const nonWhitePct = (100*nonWhite/(w*h)).toFixed(2);
+
+        const offsets=[0.2,0.5,0.8];
+        let any=false, minX=N, minY=N, maxX=-1, maxY=-1;
+        const isBg=(r,g,b)=> (r>=bgT && g>=bgT && b>=bgT);
+
+        for(let cy=0; cy<N; cy++){
+            for(let cx=0; cx<N; cx++){
+                let samples=0, nonBg=0;
+                for(const oy of offsets){
+                    for(const ox of offsets){
+                        const x = clamp(Math.floor((cx+ox)*cellW), 0, w-1);
+                        const y = clamp(Math.floor((cy+oy)*cellH), 0, h-1);
+                        const ii = (y*w + x)*4;
+                        const r=data[ii], g=data[ii+1], b=data[ii+2];
+                        samples++;
+                        if(!isBg(r,g,b)) nonBg++;
+                    }
+                }
+                if((nonBg/samples) >= minRatio){
+                    any=true;
+                    if(cx<minX) minX=cx; if(cy<minY) minY=cy; if(cx>maxX) maxX=cx; if(cy>maxY) maxY=cy;
+                }
+            }
+        }
+
+        if(!any){
+            return { found:false, bbox:null, bboxFillPct:'0.00', maxDimPct:'0.00', nonWhitePct, note:'未识别主体' };
+        }
+
+        const x0 = Math.floor(minX*cellW);
+        const y0 = Math.floor(minY*cellH);
+        const x1 = Math.min(w-1, Math.ceil((maxX+1)*cellW)-1);
+        const y1 = Math.min(h-1, Math.ceil((maxY+1)*cellH)-1);
+        const bw = Math.max(1, x1-x0+1);
+        const bh = Math.max(1, y1-y0+1);
+        const bboxArea = bw*bh;
+        return { found:true, bbox:{x0,y0,x1,y1,w:bw,h:bh}, bboxFillPct:(100*bboxArea/(w*h)).toFixed(2), maxDimPct:(100*Math.max(bw/w, bh/h)).toFixed(2), nonWhitePct, note:'' };
+    }
+
+    function drawBBox(ctx, bbox){
+        if(!bbox) return;
+        ctx.save();
+        ctx.lineWidth = Math.max(2, Math.round(Math.min(ctx.canvas.width, ctx.canvas.height)/400));
+        ctx.strokeStyle = 'rgba(255,0,0,0.85)';
+        ctx.setLineDash([10,6]);
+        ctx.strokeRect(bbox.x0+0.5, bbox.y0+0.5, bbox.w-1, bbox.h-1);
+        ctx.restore();
+    }
+
+    function summarize(label, bg, grid, ringsWorst, content){
+        const exactOK = parseFloat(bg.exactPct) >= 95;
+        const nearOK = parseFloat(bg.near1Pct) >= 98;
+        const bgKind = exactOK ? 'good' : (nearOK ? 'warn' : 'bad');
+        const score = grid.score;
+        const uniKind = score <= 10 ? 'good' : (score <= 18 ? 'warn' : 'bad');
+        const ringKind = ringsWorst.near1Pct >= 95 ? 'good' : (ringsWorst.near1Pct >= 85 ? 'warn' : 'bad');
+        const fill = content.found ? parseFloat(content.bboxFillPct) : 0;
+        const fillKind = fill >= 85 ? 'good' : (fill >= 75 ? 'warn' : 'bad');
+        const kindRank = {good:0,warn:1,bad:2};
+        const overall = [bgKind, uniKind, ringKind, fillKind].sort((a,b)=>kindRank[a]-kindRank[b])[3];
+
+        return {
+            overall,
+            chips: [
+                {k:bgKind, t:`白底: exact ${bg.exactPct}% / near ${bg.near1Pct}%`},
+                {k:ringKind, t:`Rings: ${ringsWorst.near1Pct.toFixed(2)}%`},
+                {k:uniKind, t:`均匀度: ${score.toFixed(2)}`},
+                {k:fillKind, t:`占比: bbox ${content.bboxFillPct}% / maxDim ${content.maxDimPct}%`},
+            ]
+        };
+    }
+
+    function analyzeOne(ctx, miniEl, drawOnCtx){
+        const {img, scale} = getAnalysisImageData(ctx);
+        const optsBase = { tolerance: parseInt(tol.value,10), minBright: parseInt(minBright.value,10), sampleStep: 6 };
+        const maskTol = Math.round(optsBase.tolerance * parseFloat(maskTolMul.value));
+        const bgInfo = backgroundMask(img, { tolerance: maskTol, minBright: optsBase.minBright, sampleStep: 6 });
+        const bgRep = analyzeMaskWhite(img, bgInfo.mask);
+        const gridRep = analyzeGridUniformity(img, parseInt(gridN.value,10), bgInfo.mask);
+        const depths = buildRingDepths(img.width, img.height, parseInt(ringCount.value,10), parseInt(ringMax.value,10));
+        const rings = ringNearWhiteWorst(img, depths, 6);
+        const content = estimateContent(img, { gridN: parseInt(gridN.value,10), bgNear: parseInt(bgNear.value,10), minNonBgRatio: parseFloat(objMinNonBgRatio.value) });
+
+        if(drawOnCtx && content.found && content.bbox){
+            const inv = 1/scale;
+            const bb = { x0: Math.round(content.bbox.x0*inv), y0: Math.round(content.bbox.y0*inv), x1: Math.round(content.bbox.x1*inv), y1: Math.round(content.bbox.y1*inv) };
+            bb.w = Math.max(1, bb.x1-bb.x0+1); bb.h = Math.max(1, bb.y1-bb.y0+1);
+            drawBBox(drawOnCtx, bb);
+        }
+
+        const ref = bgInfo.ref;
+        miniEl.innerHTML = `<div>Ref: ${toRgbHex(ref.r,ref.g,ref.b)}</div><div>Mask exact: ${bgRep.exactPct}%</div>`;
+        return { bgInfo, bgRep, gridRep, rings, content };
+    }
+
+    function renderDetails(srcRes, outRes){
+        const ringRows = (name, rows) => {
+            const trs = rows.map(r=>`<tr><td class="mono">${r.d}</td><td class="right mono">${r.near1Pct.toFixed(2)}%</td></tr>`).join('');
+            return `<div style="margin-top:10px"><b>${name}</b></div><table><thead><tr><th>depth(px)</th><th class="right">near(≥254)</th></tr></thead><tbody>${trs}</tbody></table>`;
+        };
+        detail.innerHTML = `
+          <div class="mini" style="margin-top:6px">Grid score：≤10 优；>18 差。</div>
+          <table><thead><tr><th></th><th class="right">grid</th><th class="right">rings</th></tr></thead>
+          <tbody><tr><td>原图</td><td class="right mono">${srcRes.gridRep.score.toFixed(2)}</td><td class="right mono">${srcRes.rings.worst.near1Pct.toFixed(2)}%</td></tr>
+          <tr><td>修复</td><td class="right mono">${outRes.gridRep.score.toFixed(2)}</td><td class="right mono">${outRes.rings.worst.near1Pct.toFixed(2)}%</td></tr></tbody></table>
+          ${ringRows('原图 rings', srcRes.rings.rows)}
+          ${ringRows('修复后 rings', outRes.rings.rows)}
+        `;
+    }
+
+    function runAnalyze(){
+        chips.innerHTML='';
+        if(imgBitmap){
+            srcCtx.clearRect(0,0,srcCanvas.width,srcCanvas.height);
+            srcCtx.drawImage(imgBitmap,0,0);
+            outCtx.clearRect(0,0,outCanvas.width,outCanvas.height);
+            outCtx.drawImage(outCanvas._lastBitmap || imgBitmap,0,0);
+        }
+        const srcRes = analyzeOne(srcCtx, srcMini, srcCtx);
+        const outRes = analyzeOne(outCtx, outMini, outCtx);
+        const srcSum = summarize('原图', srcRes.bgRep, srcRes.gridRep, srcRes.rings.worst, srcRes.content);
+        const outSum = summarize('修复后', outRes.bgRep, outRes.gridRep, outRes.rings.worst, outRes.content);
+        setChip(`原图：${srcSum.overall.toUpperCase()}`, srcSum.overall);
+        setChip(`修复后：${outSum.overall.toUpperCase()}`, outSum.overall);
+        for(const c of outSum.chips) setChip(c.t, c.k);
+        renderDetails(srcRes, outRes);
+        downloadBtn.disabled = false;
+    }
+
+    function fixBackgroundFullRes(){
+        const w=outCanvas.width, h=outCanvas.height;
+        const img = outCtx.getImageData(0,0,w,h);
+        const data = img.data;
+        const tolerance = clamp(parseInt(tol.value,10),0,255);
+        const minB = clamp(parseInt(minBright.value,10),0,255);
+        const step=6;
+        const {ref} = sampleBorderRef(img, step);
+        const tol2=tolerance*tolerance;
+        const dist2=(r,g,b)=>{ const dr=r-ref.r,dg=g-ref.g,db=b-ref.b; return dr*dr+dg*dg+db*db; };
+        const isBg=(r,g,b)=>{ if(r<minB||g<minB||b<minB) return false; return dist2(r,g,b)<=tol2; };
+        const visited = new Uint8Array(w*h);
+        const q = new Uint32Array(w*h);
+        let head=0, tail=0;
+        const push=(idx)=>{
+            if(visited[idx]) return;
+            const i=idx*4;
+            const r=data[i], g=data[i+1], b=data[i+2];
+            if(!isBg(r,g,b)) return;
+            visited[idx]=1; q[tail++] = idx;
+        };
+        for(let x=0;x<w;x++){ push(x); push((h-1)*w+x); }
+        for(let y=0;y<h;y++){ push(y*w); push(y*w+(w-1)); }
+        while(head<tail){
+            const idx=q[head++];
+            const x=idx%w; const y=(idx-x)/w;
+            if(x>0) push(idx-1); if(x<w-1) push(idx+1); if(y>0) push(idx-w); if(y<h-1) push(idx+w);
+        }
+        for(let idx=0; idx<w*h; idx++){
+            if(!visited[idx]) continue;
+            const i=idx*4; data[i]=255; data[i+1]=255; data[i+2]=255; data[i+3]=255;
+        }
+        outCtx.putImageData(img,0,0);
+        outCanvas._lastBitmap = null;
+    }
+
+    function runFix(){
+        chips.innerHTML='';
+        if(imgBitmap){
+            outCtx.clearRect(0,0,outCanvas.width,outCanvas.height);
+            outCtx.drawImage(imgBitmap,0,0);
+        }
+        fixBackgroundFullRes();
+        createImageBitmap(outCanvas).then(bm=>{ outCanvas._lastBitmap = bm; }).catch(()=>{});
+        setChip('已修复白底：再点“检测”看结果。', 'good');
+        downloadBtn.disabled = false;
+    }
+
+    // UI Bindings
+    const bindSync = (input, span) => { input.addEventListener('input', ()=> span.textContent = input.value); };
+    bindSync(tol, tolVal);
+    bindSync(minBright, minVal);
+    maskTolMul.addEventListener('input', ()=> maskMulVal.textContent = parseFloat(maskTolMul.value).toFixed(1));
+    bindSync(gridN, gridVal);
+    bindSync(bgNear, bgNearVal);
+    objMinNonBgRatio.addEventListener('input', ()=> objMinVal.textContent = parseFloat(objMinNonBgRatio.value).toFixed(2));
+    bindSync(ringMax, ringMaxVal);
+    bindSync(ringCount, ringCountVal);
+
+    fileEl.addEventListener('change', async (e)=>{
+        const f=e.target.files && e.target.files[0];
+        if(!f) return;
+        try{ 
+            imgBitmap = await createImageBitmap(f);
+            resizeCanvases(imgBitmap.width, imgBitmap.height);
+            srcCtx.clearRect(0,0,srcCanvas.width,srcCanvas.height);
+            srcCtx.drawImage(imgBitmap,0,0);
+            outCtx.clearRect(0,0,outCanvas.width,outCanvas.height);
+            outCtx.drawImage(imgBitmap,0,0);
+            outCanvas._lastBitmap = null;
+            analyzeBtn.disabled=false; fixBtn.disabled=false; resetUI();
+            setChip('已加载图片。', 'good');
+        } catch(err){
+            resetUI(); setChip(`加载失败`, 'bad');
+        }
+    });
+
+    analyzeBtn.addEventListener('click', ()=>{ if(imgBitmap) runAnalyze(); });
+    fixBtn.addEventListener('click', ()=>{ if(imgBitmap) runFix(); });
+    downloadBtn.addEventListener('click', ()=>{ 
+        if(!imgBitmap) return; 
+        const a=document.createElement('a'); a.download='v1-fixed.png'; a.href=outCanvas.toDataURL('image/png'); a.click(); 
+    });
+}
+
+/**
+ * =============================================================================
+ * TOOL 2: 合规修复专业版 (Light Mode) - Adapted Factory
+ * =============================================================================
+ */
+function initToolV2(container) {
+    container.innerHTML = `
+    <nav class="bg-amazon-dark text-white p-4 shadow-md sticky top-0 z-10">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2"><i class="fa-brands fa-amazon text-2xl"></i><span class="font-bold text-lg tracking-tight">合规助手 Pro</span></div>
+            <div class="text-xs text-gray-300">符合 Amazon 规范</div>
+        </div>
+    </nav>
+    <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Upload/Preview -->
+            <div class="lg:col-span-2 space-y-6">
+                <div data-ui="drop-zone" class="border-2 border-dashed border-gray-400 rounded-lg p-10 text-center bg-white hover:bg-gray-50 transition cursor-pointer relative">
+                    <input type="file" data-ui="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/jpeg, image/png, image/tiff, image/gif">
+                    <div class="flex flex-col items-center justify-center space-y-3">
+                        <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-400"></i>
+                        <p class="text-lg font-semibold text-gray-700">点击或拖拽图片</p>
+                    </div>
+                </div>
+                <div data-ui="preview-container" class="hidden bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                        <h3 class="font-bold text-gray-700 flex items-center">预览 <span class="text-xs font-normal text-red-500 ml-2 hidden bg-red-50 px-2 py-0.5 rounded border border-red-100" data-ui="error-legend"><i class="fa-solid fa-circle text-[8px] mr-1"></i>红色点: 脏点 | 蓝色框: 主体</span></h3>
+                        <div class="flex items-center gap-2"><span data-ui="image-dims" class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600 font-mono">-- x -- px</span><button data-ui="btn-reupload" class="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-100 transition"><i class="fa-solid fa-upload"></i> 新图</button></div>
+                    </div>
+                    <div class="relative w-full h-96 flex items-center justify-center bg-gray-100 rounded overflow-hidden transparency-grid">
+                        <canvas data-ui="main-canvas" class="max-w-full max-h-full shadow-lg object-contain"></canvas>
+                        <div data-ui="loading-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-10 hidden"><div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div><p class="text-white mt-2 font-semibold">处理中...</p></div>
+                    </div>
+                    <div class="mt-4 flex flex-wrap gap-3 justify-between items-center border-t pt-4">
+                        <div class="text-xs text-gray-400">提示：请先调整容差以准确识别。</div>
+                        <div class="flex gap-2"><button data-ui="btn-reset" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium border rounded hover:bg-gray-50 transition"><i class="fa-solid fa-rotate-left mr-1"></i> 还原</button><button data-ui="btn-download" class="px-4 py-2 bg-amazon-light hover:bg-gray-700 text-white text-sm font-bold rounded shadow disabled:opacity-50 disabled:cursor-not-allowed transition"><i class="fa-solid fa-download mr-1"></i> 下载</button></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right: Tools -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                    <div class="flex justify-between items-center mb-3 cursor-pointer" data-ui="settings-toggle"><h2 class="text-sm font-bold text-gray-800 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> 高级参数</h2><i data-ui="settings-chevron" class="fa-solid fa-chevron-down text-gray-400 text-xs transition-transform"></i></div>
+                    <div data-ui="settings-panel" class="space-y-4 text-xs border-t pt-3 hidden">
+                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600">颜色容差</label><input type="number" data-ui="num-tolerance" min="0" max="100" value="20" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-tolerance" min="0" max="100" value="20"></div>
+                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600">最低亮度</label><input type="number" data-ui="num-min-channel" min="0" max="255" value="200" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-min-channel" min="0" max="255" value="200"></div>
+                        <div><div class="flex justify-between mb-1 items-center"><label class="font-semibold text-gray-600">边缘采样</label><input type="number" data-ui="num-edge-step" min="1" max="30" value="6" class="w-14 text-right text-xs p-1 border border-gray-300 rounded font-mono text-blue-600"></div><input type="range" data-ui="input-edge-step" min="1" max="30" value="6"></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">合规性检测</h2>
+                    <button data-ui="btn-manual-check" class="w-full mb-6 py-2.5 bg-amazon-orange hover:bg-yellow-500 text-gray-900 font-bold rounded shadow transition flex items-center justify-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> 开始检测</button>
+                    <ul class="space-y-4 text-sm" data-ui="report-list"></ul>
+                    <div data-ui="overall-status" class="mt-6 p-3 rounded text-center font-bold hidden"></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">修复工具</h2>
+                    <div class="mb-6 border-b border-gray-100 pb-4"><h3 class="font-semibold text-gray-700 text-sm mb-2">1. 快速漂白 (本地)</h3><button data-ui="btn-auto-whiten" class="w-full py-2 bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium transition">执行漂白</button></div>
+                    <div class="mb-6 border-b border-gray-100 pb-4"><h3 class="font-semibold text-gray-700 text-sm mb-2 flex justify-between"><span>2. AI 抠图 (API)</span><span class="bg-yellow-100 text-yellow-800 text-[10px] px-1 rounded">强力</span></h3><input type="password" data-ui="api-key-input" placeholder="Remove.bg API Key" class="w-full text-xs p-2 border border-gray-300 rounded mb-2"><button data-ui="btn-api-remove" class="w-full py-2 btn-primary rounded text-sm font-bold shadow">一键抠图</button></div>
+                    <div><h3 class="font-semibold text-gray-700 text-sm mb-2 flex justify-between"><span>3. 画布扩展</span><span class="bg-blue-100 text-blue-800 text-[10px] px-1 rounded">补边</span></h3><div class="flex items-center gap-2 mb-2"><input type="number" data-ui="expansion-input" value="50" min="1" class="w-20 text-xs p-2 border border-gray-300 rounded text-center"><span class="text-xs text-gray-600">px</span></div><button data-ui="btn-expand-canvas" class="w-full py-2 bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium"><i class="fa-solid fa-expand mr-1 text-xs"></i> 执行扩展</button></div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+
+    const $ = (name) => container.querySelector(`[data-ui="${name}"]`);
+    
+    // Elements
+    const dropZone = $('drop-zone');
+    const fileInput = $('file-input');
+    const previewContainer = $('preview-container');
+    const canvas = $('main-canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const loadingOverlay = $('loading-overlay');
+    const imageDimsDisplay = $('image-dims');
+    const reportList = $('report-list');
+    const overallStatus = $('overall-status');
+    const errorLegend = $('error-legend');
+    
+    // Settings
+    const settingsToggle = $('settings-toggle');
+    const settingsPanel = $('settings-panel');
+    const settingsChevron = $('settings-chevron');
+    
+    const inputTolerance = $('input-tolerance');
+    const numTolerance = $('num-tolerance');
+    const inputMinChannel = $('input-min-channel');
+    const numMinChannel = $('num-min-channel');
+    const inputEdgeStep = $('input-edge-step');
+    const numEdgeStep = $('num-edge-step');
+
+    // State
+    let currentFile = null;
+    let originalImage = null;
+    let cleanImageData = null;
+
+    // --- Helpers ---
+    function syncInputs(slider, num) {
+        slider.addEventListener('input', () => num.value = slider.value);
+        num.addEventListener('input', () => { 
+            let val = parseInt(num.value); if(!isNaN(val)) slider.value = Math.max(slider.min, Math.min(slider.max, val)); 
+        });
+    }
+    syncInputs(inputTolerance, numTolerance);
+    syncInputs(inputMinChannel, numMinChannel);
+    syncInputs(inputEdgeStep, numEdgeStep);
+
+    settingsToggle.addEventListener('click', () => {
+        settingsPanel.classList.toggle('hidden');
+        settingsChevron.style.transform = settingsPanel.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+
+    function resetReportUI() {
+        reportList.innerHTML = `
+            <li class="flex items-start gap-3 opacity-60"><i class="fa-regular fa-circle checker-pending mt-1"></i><div><span class="font-semibold block text-gray-500">尺寸检测</span><span class="text-gray-400 text-xs">等待检测...</span></div></li>
+            <li class="flex items-start gap-3 opacity-60"><i class="fa-regular fa-circle checker-pending mt-1"></i><div><span class="font-semibold block text-gray-500">内容占比 (85%)</span><span class="text-gray-400 text-xs">等待检测...</span></div></li>
+            <li class="flex items-start gap-3 opacity-60"><i class="fa-regular fa-circle checker-pending mt-1"></i><div><span class="font-semibold block text-gray-500">纯白背景</span><span class="text-gray-400 text-xs">等待检测...</span></div></li>
+        `;
+        overallStatus.classList.add('hidden');
+        errorLegend.classList.add('hidden');
+    }
+
+    function renderImage(img) {
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.drawImage(img,0,0);
+        imageDimsDisplay.innerText = `${img.width} x ${img.height} px`;
+        cleanImageData = ctx.getImageData(0,0,img.width,img.height);
+    }
+
+    function restoreClean() {
+        if(cleanImageData) {
+            canvas.width = cleanImageData.width; canvas.height = cleanImageData.height;
+            ctx.putImageData(cleanImageData, 0, 0);
+        }
+    }
+
+    function analyze(drawErrors = true) {
+        restoreClean();
+        const width = canvas.width, height = canvas.height;
+        const imageData = ctx.getImageData(0,0,width,height);
+        const data = imageData.data;
+        const tol = parseInt(inputTolerance.value) || 20;
+        const minC = parseInt(inputMinChannel.value) || 200;
+        
+        // 1. Dims
+        const maxSide = Math.max(width, height);
+        const dimsStatus = maxSide >= 1000 ? 'pass' : 'fail';
+        
+        // 2. Fill
+        let minX=width, maxX=0, minY=height, maxY=0, hasContent=false;
+        const thresh = 255 - tol;
+        for(let y=0; y<height; y++){
+            for(let x=0; x<width; x++){
+                const i = (y*width+x)*4;
+                const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+                if(a===0) continue; 
+                const isBg = (r>=minC && g>=minC && b>=minC) && (r>=thresh && g>=thresh && b>=thresh);
+                if(!isBg) {
+                    if(x<minX) minX=x; if(x>maxX) maxX=x; if(y<minY) minY=y; if(y>maxY) maxY=y;
+                    hasContent=true;
+                }
+            }
+        }
+        let fillStatus = 'fail', fillMsg = '未识别主体';
+        let bbox = null;
+        if(hasContent){
+            const cw = maxX-minX+1, ch = maxY-minY+1;
+            const rate = (Math.max(cw,ch)/maxSide*100);
+            fillStatus = rate >= 85 ? 'pass' : 'fail';
+            fillMsg = `占比 ${rate.toFixed(1)}%`;
+            bbox = {minX, minY, width:cw, height:ch};
+        }
+
+        // 3. BG
+        let bgStatus = 'pass', bgMsg = '纯白';
+        // Simple ring check at depth 5
+        const depth = 5;
+        let notWhite = 0;
+        for(let x=depth; x<width-depth; x+=6) {
+             const check = (xx,yy) => {
+                 const i=(yy*width+xx)*4;
+                 if(data[i]<255 || data[i+1]<255 || data[i+2]<255) notWhite++;
+             };
+             check(x, depth); check(x, height-1-depth);
+        }
+        for(let y=depth; y<height-depth; y+=6) {
+             const check = (xx,yy) => {
+                 const i=(yy*width+xx)*4;
+                 if(data[i]<255 || data[i+1]<255 || data[i+2]<255) notWhite++;
+             };
+             check(depth, y); check(width-1-depth, y);
+        }
+        if(notWhite > 0) { bgStatus = 'fail'; bgMsg = '边缘不纯'; }
+
+        // Render UI
+        const icon = (s) => s==='pass' ? '<i class="fa-solid fa-check-circle checker-pass"></i>' : '<i class="fa-solid fa-times-circle checker-fail"></i>';
+        reportList.innerHTML = `
+            <li class="flex gap-3">${icon(dimsStatus)} <div><span class="block text-gray-700 font-semibold">尺寸</span><span class="text-xs text-gray-500">${maxSide}px</span></div></li>
+            <li class="flex gap-3">${icon(fillStatus)} <div><span class="block text-gray-700 font-semibold">占比</span><span class="text-xs text-gray-500">${fillMsg}</span></div></li>
+            <li class="flex gap-3">${icon(bgStatus)} <div><span class="block text-gray-700 font-semibold">背景</span><span class="text-xs text-gray-500">${bgMsg}</span></div></li>
+        `;
+        
+        overallStatus.className = `mt-6 p-3 rounded text-center font-bold ${dimsStatus==='pass' && fillStatus==='pass' && bgStatus==='pass' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        overallStatus.innerHTML = dimsStatus==='pass' && fillStatus==='pass' && bgStatus==='pass' ? '符合标准' : '存在问题';
+        overallStatus.classList.remove('hidden');
+
+        if(drawErrors){
+            if(bbox){
+                ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
+                ctx.strokeRect(bbox.minX, bbox.minY, bbox.width, bbox.height);
+                ctx.setLineDash([]);
+            }
+            if(bgStatus === 'fail') {
+                ctx.fillStyle = "red";
+                for(let x=0; x<width; x+=6) { if(data[(5*width+x)*4]<255) ctx.fillRect(x,5,4,4); }
+            }
+            errorLegend.classList.remove('hidden');
+        }
+    }
+
+    // Actions
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        currentFile = file;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            originalImage = new Image();
+            originalImage.onload = () => {
+                renderImage(originalImage);
+                dropZone.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+                resetReportUI();
+            };
+            originalImage.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    $('btn-reset').addEventListener('click', () => { if(originalImage) { renderImage(originalImage); resetReportUI(); }});
+    $('btn-reupload').addEventListener('click', () => { currentFile=null; fileInput.value=''; previewContainer.classList.add('hidden'); dropZone.classList.remove('hidden'); });
+    $('btn-manual-check').addEventListener('click', () => analyze(true));
+    $('btn-download').addEventListener('click', () => { const a=document.createElement('a'); a.download='fixed.jpg'; a.href=canvas.toDataURL('image/jpeg',0.95); a.click(); });
+
+    $('btn-auto-whiten').addEventListener('click', () => {
+        if(!cleanImageData) return;
+        restoreClean();
+        loadingOverlay.classList.remove('hidden');
+        setTimeout(() => {
+            const img = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const data = img.data;
+            const tol = parseInt(inputTolerance.value);
+            const minC = parseInt(inputMinChannel.value);
+            const th = 255 - tol;
+            for(let i=0; i<data.length; i+=4){
+                const r=data[i],g=data[i+1],b=data[i+2];
+                if(r>=minC && g>=minC && b>=minC && r>=th && g>=th && b>=th){
+                    data[i]=255; data[i+1]=255; data[i+2]=255; data[i+3]=255;
+                }
+            }
+            ctx.putImageData(img,0,0);
+            cleanImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            loadingOverlay.classList.add('hidden');
+            analyze(true);
+        }, 50);
+    });
+    
+    // Canvas Expand
+    $('btn-expand-canvas').addEventListener('click', () => {
+        const pad = parseInt($('expansion-input').value) || 50;
+        restoreClean();
+        const temp = new Image();
+        temp.onload = () => {
+            canvas.width += pad*2; canvas.height += pad*2;
+            ctx.fillStyle='#FFF'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.drawImage(temp, pad, pad);
+            cleanImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            imageDimsDisplay.innerText = `${canvas.width} x ${canvas.height} px`;
+            analyze(true);
+        };
+        temp.src = canvas.toDataURL();
+    });
+
+    // API Remove
+    $('btn-api-remove').addEventListener('click', async () => {
+        const key = $('api-key-input').value.trim();
+        if(!key) return alert('请输入 API Key');
+        restoreClean();
+        loadingOverlay.classList.remove('hidden');
+        canvas.toBlob(async (blob) => {
+            const fd = new FormData(); fd.append('image_file', blob); fd.append('size','auto'); fd.append('bg_color','white');
+            try {
+                const res = await fetch('https://api.remove.bg/v1.0/removebg', { method:'POST', headers:{'X-Api-Key':key}, body:fd });
+                if(res.ok) {
+                    const b = await res.blob();
+                    const img = new Image();
+                    img.onload = () => { renderImage(img); loadingOverlay.classList.add('hidden'); analyze(true); };
+                    img.src = URL.createObjectURL(b);
+                } else throw new Error('API Error');
+            } catch(e) { alert(e.message); loadingOverlay.classList.add('hidden'); }
+        });
+    });
+}
+</script>
+</body>
+</html>
