@@ -814,7 +814,7 @@ function initToolV1(container) {
             if (!blob) return;
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); 
-            a.download = 'v1-fixed.png'; 
+            a.download = `v1-fixed-${Date.now()}.png`; 
             a.href = url; 
             document.body.appendChild(a);
             a.click();
@@ -1262,7 +1262,7 @@ function initToolV2(container) {
             if (!blob) return;
             const url = URL.createObjectURL(blob);
             const a=document.createElement('a'); 
-            a.download='amazon_fixed.jpg'; 
+            a.download=`amazon_fixed_${Date.now()}.jpg`; 
             a.href=url; 
             document.body.appendChild(a);
             a.click();
