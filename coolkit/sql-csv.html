@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CSV SQL 分析器 (Redshift 风格)</title>
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- FontAwesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <!-- PapaParse -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+        <!-- SQL.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+
+        <style>
+            /* 基础样式 */
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Helvetica, Arial, sans-serif;
+            }
+            .code-font {
+                font-family: "Menlo", "Monaco", "Courier New", monospace;
+            }
+
+            /* 滚动条 */
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #f8fafc;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+
+            /* 分割条样式 */
+            .resizer-row {
+                height: 6px;
+                background-color: #e2e8f0;
+                cursor: row-resize;
+                transition: background-color 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10;
+            }
+            .resizer-row:hover,
+            .resizer-row.resizing {
+                background-color: #3b82f6;
+            }
+
+            /* 标签页样式 */
+            .tab-btn {
+                max-width: 160px;
+                min-width: 100px;
+            }
+            .tab-btn.active {
+                background-color: white;
+                border-bottom-color: white;
+                color: #2563eb;
+                font-weight: 600;
+            }
+            .tab-btn:not(.active):hover {
+                background-color: #f1f5f9;
+            }
+
+            /* 隐藏元素 */
+            .hidden {
+                display: none !important;
+            }
+
+            /* 右键菜单样式 */
+            .custom-context-menu {
+                position: fixed;
+                z-index: 100;
+                width: 140px;
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                box-shadow:
+                    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                padding: 4px 0;
+                display: none;
+            }
+            .context-menu-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 12px;
+                font-size: 12px;
+                color: #334155;
+                cursor: pointer;
+                transition: background-color 0.1s;
+            }
+            .context-menu-item:hover {
+                background-color: #f1f5f9;
+                color: #2563eb;
+            }
+            .context-menu-item.danger:hover {
+                color: #ef4444;
+            }
+
+            /* --- 新增样式: 表格列宽调整 --- */
+            table {
+                table-layout: fixed; /* 固定布局以便调整列宽 */
+                width: 100%;
+            }
+            th {
+                position: relative;
+                overflow: visible; /* 允许拖动条溢出 */
+            }
+            /* 排序图标占位 */
+            .sort-icon {
+                display: inline-block;
+                width: 12px;
+            }
+
+            .resizer-col {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 5px;
+                height: 100%;
+                cursor: col-resize;
+                user-select: none;
+                touch-action: none;
+                z-index: 20;
+            }
+            .resizer-col:hover,
+            .resizer-col.resizing {
+                background-color: #3b82f6;
+                width: 4px; /* hover 时变宽一点 */
+            }
+
+            /* --- 新增样式: 单元格截断与编辑 --- */
+            td.truncate-cell {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            /* 选中编辑时的样式 */
+            td[contenteditable="true"] {
+                outline: 2px solid #3b82f6;
+                outline-offset: -2px;
+                background-color: #fff;
+                overflow: visible;
+                white-space: pre-wrap; /* 编辑时允许换行 */
+                z-index: 10;
+                position: relative;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            /* --- 新增样式: 悬浮提示 Tooltip --- */
+            #cell-tooltip {
+                position: fixed;
+                z-index: 9999;
+                background: #1e293b;
+                color: #f8fafc;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-family: "Menlo", monospace;
+                max-width: 400px;
+                max-height: 300px;
+                overflow-y: auto;
+                word-wrap: break-word;
+                white-space: pre-wrap;
+                pointer-events: none;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+                opacity: 0;
+                transition: opacity 0.15s ease-in-out;
+                border: 1px solid #334155;
+            }
+            #cell-tooltip.show {
+                opacity: 1;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-slate-50 text-slate-800 h-screen flex flex-col overflow-hidden select-none"
+    >
+        <!-- 顶部导航 -->
+        <header
+            class="bg-slate-900 text-white h-12 flex items-center px-4 justify-between shrink-0 z-20 shadow-md"
+        >
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-database text-blue-400"></i>
+                <span class="font-bold tracking-tight text-sm"
+                    >CSV SQL 分析器 Pro</span
+                >
+            </div>
+            <div class="text-xs text-slate-400 flex items-center gap-3">
+                <span id="status-indicator" class="flex items-center gap-1.5">
+                    <span
+                        class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"
+                    ></span>
+                    加载引擎...
+                </span>
+            </div>
+        </header>
+
+        <!-- 主体布局 -->
+        <main class="flex-1 flex overflow-hidden">
+            <!-- 左侧边栏：资源管理器 -->
+            <div
+                class="w-64 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0 z-10"
+            >
+                <!-- 导入区 -->
+                <div class="p-3 border-b border-slate-200">
+                    <label
+                        for="csv-upload"
+                        class="flex items-center justify-center w-full py-2 px-3 border border-dashed border-slate-300 rounded-md cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-all group"
+                    >
+                        <div
+                            class="flex items-center gap-2 text-xs text-slate-600 group-hover:text-blue-600"
+                        >
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>导入 CSV (支持多选)</span>
+                        </div>
+                        <input
+                            id="csv-upload"
+                            type="file"
+                            class="hidden"
+                            accept=".csv"
+                            multiple
+                        />
+                    </label>
+                </div>
+
+                <!-- Schema 列表 -->
+                <div class="flex-1 overflow-y-auto p-3">
+                    <div
+                        class="text-xs font-bold text-slate-400 uppercase mb-2 px-1"
+                    >
+                        Schemas
+                    </div>
+                    <div id="schema-list" class="space-y-3">
+                        <div class="text-center mt-10">
+                            <p class="text-[10px] text-slate-400 italic">
+                                暂无数据表
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="p-2 border-t border-slate-200 text-[10px] text-slate-400 text-center"
+                >
+                    右键点击表名可删除
+                </div>
+            </div>
+
+            <!-- 右侧主区域 -->
+            <div class="flex-1 flex flex-col bg-white min-w-0">
+                <div
+                    class="h-9 bg-slate-100 border-b border-slate-200 flex items-end px-1 gap-1 overflow-x-auto no-scrollbar shrink-0"
+                >
+                    <div
+                        id="tabs-container"
+                        class="flex items-end gap-1 h-full"
+                    ></div>
+                    <button
+                        onclick="createNewTab()"
+                        class="ml-1 mb-1 w-7 h-7 flex items-center justify-center rounded hover:bg-slate-200 text-slate-500 transition-colors"
+                        title="新建查询"
+                    >
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                </div>
+                <div
+                    id="panes-container"
+                    class="flex-1 relative overflow-hidden bg-white"
+                ></div>
+            </div>
+        </main>
+
+        <!-- 模板：Tab Pane -->
+        <template id="tab-pane-template">
+            <div
+                class="tab-pane h-full flex flex-col absolute inset-0 bg-white"
+            >
+                <!-- 上半部分：SQL 编辑器 (Flex-col 来包含 Toolbar 和 Textarea) -->
+                <div
+                    class="editor-section flex flex-col relative"
+                    style="height: 40%; min-height: 80px"
+                >
+                    <!-- 新增：顶部工具栏 -->
+                    <div
+                        class="h-10 bg-slate-50 border-b border-slate-200 flex items-center px-2 gap-2 shrink-0 select-none"
+                    >
+                        <button
+                            class="run-query-btn bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 px-3 rounded shadow flex items-center gap-1.5 transition-colors"
+                            onmousedown="event.preventDefault()"
+                        >
+                            <i class="fa-solid fa-play"></i> 运行
+                        </button>
+                        <div class="h-4 w-px bg-slate-300 mx-1"></div>
+                        <span
+                            class="text-[10px] text-slate-400 flex items-center gap-1"
+                        >
+                            <i class="fa-regular fa-lightbulb"></i> 提示:
+                            双击表头可排序，右键运行选中语句
+                        </span>
+                    </div>
+
+                    <!-- Textarea: 移除 absolute 按钮，改为 flex-1 -->
+                    <textarea
+                        class="sql-textarea flex-1 w-full p-4 text-sm code-font resize-none outline-none text-slate-800 focus:bg-blue-50/10 transition-colors"
+                        placeholder="在此输入 SQL 语句..."
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+
+                <div class="resizer-row group">
+                    <div
+                        class="w-8 h-1 rounded-full bg-slate-300 group-hover:bg-blue-400"
+                    ></div>
+                </div>
+
+                <div
+                    class="result-section flex-1 flex flex-col min-h-[50px] overflow-hidden bg-slate-50 relative"
+                >
+                    <div
+                        class="h-8 bg-slate-100 border-b border-slate-200 flex items-center justify-between px-3 shrink-0"
+                    >
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-semibold text-slate-500"
+                                >查询结果</span
+                            >
+                            <!-- 新增导出按钮 -->
+                            <button
+                                class="export-btn text-slate-400 hover:text-blue-600 transition-colors p-1 rounded hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="导出为 CSV"
+                            >
+                                <i class="fa-solid fa-download text-xs"></i>
+                                <span class="text-[10px]">导出 CSV</span>
+                            </button>
+                        </div>
+                        <span
+                            class="result-stats text-[10px] text-slate-400 font-mono"
+                        ></span>
+                    </div>
+                    <div class="table-container flex-1 overflow-auto">
+                        <table
+                            class="min-w-full text-left text-sm whitespace-nowrap border-collapse"
+                        >
+                            <thead
+                                class="bg-slate-50 sticky top-0 shadow-sm z-10"
+                            >
+                                <tr class="result-thead-tr"></tr>
+                            </thead>
+                            <tbody
+                                class="result-tbody bg-white divide-y divide-slate-100"
+                            >
+                                <tr>
+                                    <td
+                                        class="p-8 text-center text-slate-400 text-xs italic"
+                                    >
+                                        请运行查询以查看结果
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div
+                        class="error-overlay hidden absolute inset-0 bg-white/95 z-20 flex items-start justify-center pt-10"
+                    >
+                        <div
+                            class="bg-red-50 border border-red-200 rounded p-4 max-w-lg text-red-700 text-xs font-mono break-all shadow-sm"
+                        >
+                            <i
+                                class="fa-solid fa-circle-exclamation mr-1.5"
+                            ></i>
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- 全屏透明遮罩 (用于关闭所有菜单) -->
+        <div
+            id="menu-backdrop"
+            class="fixed inset-0 z-[90] hidden"
+            onclick="hideAllContextMenus()"
+        ></div>
+
+        <!-- 1. 表格管理右键菜单 -->
+        <div id="table-context-menu" class="custom-context-menu">
+            <div class="context-menu-item" onclick="copyTargetTableName()">
+                <i class="fa-regular fa-copy"></i> 复制表名
+            </div>
+            <div class="context-menu-item danger" onclick="deleteTargetTable()">
+                <i class="fa-solid fa-trash-can"></i> 删除表
+            </div>
+        </div>
+
+        <!-- 2. 编辑器右键菜单 (新增) -->
+        <div id="editor-context-menu" class="custom-context-menu w-40">
+            <div class="context-menu-item" onclick="runSelectedFromMenu()">
+                <i class="fa-solid fa-play text-blue-500"></i> 运行选中语句
+            </div>
+        </div>
+
+        <!-- 悬浮提示框 -->
+        <div id="cell-tooltip"></div>
+
+        <script>
+            // --- 全局状态 ---
+            let db = null;
+            let SQL = null;
+            let tabs = [];
+            let activeTabId = null;
+            let tabCounter = 1;
+
+            // 上下文菜单状态
+            let tableContextMenuTarget = null;
+            let editorSelectionTarget = null; // { tabId: string, sql: string }
+
+            // Tooltip 状态
+            let tooltipTimer = null;
+            const tooltipEl = document.getElementById("cell-tooltip");
+
+            // --- 初始化 ---
+            const config = {
+                locateFile: (filename) =>
+                    `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${filename}`,
+            };
+
+            initSqlJs(config)
+                .then(function (sqlModule) {
+                    SQL = sqlModule;
+                    db = new SQL.Database();
+                    updateStatus("ready");
+                    createNewTab();
+                })
+                .catch((err) => {
+                    console.error(err);
+                    updateStatus("error");
+                });
+
+            function updateStatus(state) {
+                const el = document.getElementById("status-indicator");
+                if (state === "ready") {
+                    el.innerHTML =
+                        '<span class="w-2 h-2 rounded-full bg-green-500"></span> 引擎就绪';
+                } else if (state === "processing") {
+                    el.innerHTML =
+                        '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> 处理中...';
+                } else {
+                    el.innerHTML =
+                        '<span class="w-2 h-2 rounded-full bg-red-500"></span> 错误';
+                }
+            }
+
+            // --- 事件委托：处理 Tooltip 和 双击编辑 ---
+            document.addEventListener("mouseover", function (e) {
+                if (
+                    e.target.tagName === "TD" &&
+                    e.target.classList.contains("truncate-cell")
+                ) {
+                    if (e.target.scrollWidth > e.target.clientWidth) {
+                        const text = e.target.innerText;
+                        const x = e.clientX;
+                        const y = e.clientY;
+                        tooltipTimer = setTimeout(() => {
+                            tooltipEl.innerText = text;
+                            tooltipEl.style.left = `${x + 10}px`;
+                            tooltipEl.style.top = `${y + 10}px`;
+                            const rect = tooltipEl.getBoundingClientRect();
+                            if (rect.right > window.innerWidth)
+                                tooltipEl.style.left = `${window.innerWidth - rect.width - 10}px`;
+                            if (rect.bottom > window.innerHeight)
+                                tooltipEl.style.top = `${window.innerHeight - rect.height - 10}px`;
+                            tooltipEl.classList.add("show");
+                        }, 1000);
+                    }
+                }
+            });
+
+            document.addEventListener("mouseout", function (e) {
+                if (e.target.tagName === "TD") {
+                    clearTimeout(tooltipTimer);
+                    tooltipEl.classList.remove("show");
+                }
+            });
+
+            document.addEventListener("dblclick", function (e) {
+                // 双击表体单元格 -> 编辑模式
+                if (
+                    e.target.tagName === "TD" &&
+                    e.target.closest(".result-tbody")
+                ) {
+                    const cell = e.target;
+                    cell.contentEditable = true;
+                    cell.focus();
+
+                    // 移除全选逻辑，保留默认光标行为
+                    const onBlur = () => {
+                        cell.contentEditable = false;
+                        cell.removeEventListener("blur", onBlur);
+                    };
+                    cell.addEventListener("blur", onBlur);
+                }
+            });
+
+            // --- 排序逻辑 ---
+            function toggleSort(event, colIndex) {
+                const pane = event.target.closest(".tab-pane");
+                if (!pane || !pane.queryResult) return;
+
+                let { sortState, queryResult } = pane;
+
+                // 更新排序状态循环: ASC -> DESC -> None
+                if (sortState.colIndex === colIndex) {
+                    if (sortState.direction === "none")
+                        sortState.direction = "asc";
+                    else if (sortState.direction === "asc")
+                        sortState.direction = "desc";
+                    else sortState.direction = "none";
+                } else {
+                    sortState.colIndex = colIndex;
+                    sortState.direction = "asc";
+                }
+
+                // 执行排序
+                if (sortState.direction === "none") {
+                    // 恢复原始顺序
+                    queryResult.values = [...queryResult.originalValues];
+                } else {
+                    queryResult.values.sort((a, b) => {
+                        let valA = a[colIndex];
+                        let valB = b[colIndex];
+
+                        // 空值处理 (NULL 视为最小值)
+                        if (valA === valB) return 0;
+                        if (valA === null)
+                            return sortState.direction === "asc" ? -1 : 1;
+                        if (valB === null)
+                            return sortState.direction === "asc" ? 1 : -1;
+
+                        // 数字比较
+                        if (
+                            typeof valA === "number" &&
+                            typeof valB === "number"
+                        ) {
+                            return sortState.direction === "asc"
+                                ? valA - valB
+                                : valB - valA;
+                        }
+
+                        // 字符串比较
+                        valA = String(valA).toLowerCase();
+                        valB = String(valB).toLowerCase();
+                        if (valA < valB)
+                            return sortState.direction === "asc" ? -1 : 1;
+                        if (valA > valB)
+                            return sortState.direction === "asc" ? 1 : -1;
+                        return 0;
+                    });
+                }
+
+                // 重新渲染表格
+                renderResultTable(pane);
+            }
+
+            // --- 导出 CSV 逻辑 ---
+            async function exportResultToCSV(tabId) {
+                const pane = document.getElementById(tabId);
+                if (!pane || !pane.queryResult) {
+                    return;
+                }
+
+                const { columns, values } = pane.queryResult;
+
+                if (!values || values.length === 0) {
+                    alert("结果集为空，无法导出");
+                    return;
+                }
+
+                // 使用 PapaParse 将 JSON/Array 转换为 CSV 字符串
+                const csv = Papa.unparse({
+                    fields: columns,
+                    data: values,
+                });
+
+                // 添加 BOM 以支持 Excel 中文显示
+                const csvContent = "\uFEFF" + csv;
+
+                // 生成默认文件名: query_result_时间戳.csv
+                const timestamp = new Date()
+                    .toISOString()
+                    .replace(/[:.]/g, "-")
+                    .slice(0, 19);
+                const defaultName = `query_result_${timestamp}.csv`;
+
+                // 1. 尝试使用 File System Access API (允许用户选择保存位置)
+                if ("showSaveFilePicker" in window) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: defaultName,
+                            types: [
+                                {
+                                    description: "CSV 文件",
+                                    accept: { "text/csv": [".csv"] },
+                                },
+                            ],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(csvContent);
+                        await writable.close();
+                        return; // 保存成功，直接返回
+                    } catch (err) {
+                        if (err.name === "AbortError") {
+                            return; // 用户取消了保存
+                        }
+                        console.warn(
+                            "File System Access API failed, falling back to download link.",
+                            err,
+                        );
+                        // 如果出错（非用户取消），继续执行下面的降级方案
+                    }
+                }
+
+                // 2. 降级方案：使用 Prompt 询问文件名，然后通过 A 标签下载
+                let fileName = prompt("请输入导出文件名:", defaultName);
+                if (fileName === null) return; // 用户取消
+
+                if (!fileName.trim()) fileName = defaultName;
+                if (!fileName.toLowerCase().endsWith(".csv"))
+                    fileName += ".csv";
+
+                const blob = new Blob([csvContent], {
+                    type: "text/csv;charset=utf-8;",
+                });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+
+                link.setAttribute("href", url);
+                link.setAttribute("download", fileName);
+                link.style.visibility = "hidden";
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+
+            // --- 标签页管理 ---
+            function createNewTab(initialName = null, initialSql = null) {
+                const id =
+                    "tab-" +
+                    Date.now() +
+                    "-" +
+                    Math.random().toString(36).substr(2, 5);
+                const name = initialName || `Query ${tabCounter++}`;
+
+                const tabBtn = document.createElement("div");
+                tabBtn.className = `tab-btn h-8 px-3 border border-b-0 border-transparent rounded-t-md flex items-center justify-between gap-2 text-xs cursor-pointer select-none border-b border-b-slate-200`;
+                tabBtn.dataset.id = id;
+                tabBtn.innerHTML = `
+                <span class="truncate pointer-events-none">${name}</span>
+                <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 rounded-full p-0.5 transition-colors" onclick="closeTab(event, '${id}')"></i>
+            `;
+                tabBtn.onclick = (e) => {
+                    if (e.target.tagName !== "I") switchTab(id);
+                };
+                document.getElementById("tabs-container").appendChild(tabBtn);
+
+                const template = document.getElementById("tab-pane-template");
+                const clone = template.content.cloneNode(true);
+                const pane = clone.querySelector(".tab-pane");
+                pane.id = id;
+
+                // 初始化数据状态
+                pane.queryResult = null;
+                pane.sortState = { colIndex: -1, direction: "none" };
+
+                // 绑定工具栏的运行按钮
+                pane.querySelector(".run-query-btn").onclick = () =>
+                    runQueryInTab(id);
+
+                // 绑定导出按钮
+                pane.querySelector(".export-btn").onclick = () =>
+                    exportResultToCSV(id);
+
+                // 绑定编辑器的右键菜单
+                const textarea = pane.querySelector(".sql-textarea");
+                textarea.addEventListener("contextmenu", (e) => {
+                    const selectedText = textarea.value
+                        .substring(
+                            textarea.selectionStart,
+                            textarea.selectionEnd,
+                        )
+                        .trim();
+                    if (selectedText) {
+                        e.preventDefault();
+                        showEditorContextMenu(e, id, selectedText);
+                    }
+                });
+
+                initResizer(pane);
+
+                if (initialSql)
+                    pane.querySelector(".sql-textarea").value = initialSql;
+                document.getElementById("panes-container").appendChild(pane);
+
+                tabs.push({ id, name });
+                switchTab(id);
+            }
+
+            function switchTab(id) {
+                activeTabId = id;
+                document.querySelectorAll(".tab-btn").forEach((btn) => {
+                    if (btn.dataset.id === id) {
+                        btn.classList.add(
+                            "active",
+                            "border-slate-200",
+                            "bg-white",
+                        );
+                        btn.classList.remove("border-transparent");
+                    } else {
+                        btn.classList.remove(
+                            "active",
+                            "border-slate-200",
+                            "bg-white",
+                        );
+                        btn.classList.add("border-transparent");
+                    }
+                });
+                document.querySelectorAll(".tab-pane").forEach((pane) => {
+                    pane.classList.toggle("hidden", pane.id !== id);
+                });
+            }
+
+            function closeTab(e, id) {
+                e.stopPropagation();
+                if (tabs.length === 1) {
+                    createNewTab();
+                }
+                document.querySelector(`.tab-btn[data-id="${id}"]`).remove();
+                document.getElementById(id).remove();
+                const index = tabs.findIndex((t) => t.id === id);
+                tabs.splice(index, 1);
+                if (activeTabId === id) {
+                    const nextTab = tabs[index] || tabs[index - 1];
+                    if (nextTab) switchTab(nextTab.id);
+                }
+            }
+
+            function initResizer(pane) {
+                const resizer = pane.querySelector(".resizer-row");
+                const topSection = pane.querySelector(".editor-section");
+                let isResizing = false;
+                resizer.addEventListener("mousedown", (e) => {
+                    isResizing = true;
+                    resizer.classList.add("resizing");
+                    document.body.style.cursor = "row-resize";
+                });
+                document.addEventListener("mousemove", (e) => {
+                    if (!isResizing) return;
+                    const paneRect = pane.getBoundingClientRect();
+                    const percentage =
+                        ((e.clientY - paneRect.top) / paneRect.height) * 100;
+                    if (percentage > 10 && percentage < 90)
+                        topSection.style.height = `${percentage}%`;
+                });
+                document.addEventListener("mouseup", () => {
+                    if (isResizing) {
+                        isResizing = false;
+                        resizer.classList.remove("resizing");
+                        document.body.style.cursor = "default";
+                    }
+                });
+            }
+
+            // --- 文件导入 ---
+            document
+                .getElementById("csv-upload")
+                .addEventListener("change", (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    updateStatus("processing");
+                    let processedCount = 0;
+                    const totalFiles = files.length;
+                    Array.from(files).forEach((file) => {
+                        const tableName = file.name
+                            .split(".")[0]
+                            .replace(/[^a-zA-Z0-9_]/g, "_");
+                        Papa.parse(file, {
+                            header: true,
+                            dynamicTyping: true,
+                            skipEmptyLines: true,
+                            complete: (results) => {
+                                processedCount++;
+                                if (
+                                    results.errors.length === 0 &&
+                                    results.data.length > 0
+                                ) {
+                                    importToDB(
+                                        tableName,
+                                        results.data,
+                                        results.meta.fields,
+                                        processedCount === totalFiles,
+                                    );
+                                }
+                                if (processedCount === totalFiles) {
+                                    updateStatus("ready");
+                                    e.target.value = "";
+                                }
+                            },
+                            error: () => {
+                                processedCount++;
+                                if (processedCount === totalFiles)
+                                    updateStatus("ready");
+                            },
+                        });
+                    });
+                });
+
+            function importToDB(tableName, data, headers, isLastFile) {
+                try {
+                    db.run(`DROP TABLE IF EXISTS "${tableName}"`);
+                    const createCols = headers.map((h) => `"${h}"`).join(",");
+                    db.run(`CREATE TABLE "${tableName}" (${createCols})`);
+                    const placeholders = headers.map(() => "?").join(",");
+                    const stmt = db.prepare(
+                        `INSERT INTO "${tableName}" VALUES (${placeholders})`,
+                    );
+                    db.run("BEGIN TRANSACTION");
+                    for (const row of data) {
+                        const values = headers.map((h) => {
+                            let val = row[h];
+                            if (val === undefined) return null;
+                            if (
+                                val === null ||
+                                typeof val === "number" ||
+                                typeof val === "string"
+                            )
+                                return val;
+                            if (val instanceof Date) return val.toISOString();
+                            if (typeof val === "boolean") return val ? 1 : 0;
+                            if (typeof val === "object")
+                                return JSON.stringify(val);
+                            return String(val);
+                        });
+                        stmt.run(values);
+                    }
+                    db.run("COMMIT");
+                    stmt.free();
+                    updateSchemaList(tableName, headers);
+                    if (isLastFile)
+                        createNewTab(
+                            `Table: ${tableName}`,
+                            `SELECT * FROM "${tableName}" LIMIT 50;`,
+                        );
+                } catch (err) {
+                    try {
+                        db.run("ROLLBACK");
+                    } catch (e) {}
+                    alert(`导入表 ${tableName} 失败: ` + err.message);
+                }
+            }
+
+            function updateSchemaList(tableName, headers) {
+                const container = document.getElementById("schema-list");
+                if (container.querySelector(".italic"))
+                    container.innerHTML = "";
+                const existingId = `schema-${tableName}`;
+                const existingEl = document.getElementById(existingId);
+                if (existingEl) existingEl.remove();
+
+                const tableHtml = `
+                <div id="${existingId}" class="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm" oncontextmenu="showTableContextMenu(event, '${tableName}')">
+                    <div class="bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center group cursor-pointer" onclick="toggleSchema('${tableName}')">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-table text-blue-500"></i> ${tableName}</span>
+                        <i id="icon-${tableName}" class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform"></i>
+                    </div>
+                    <div id="cols-${tableName}" class="p-2 bg-white max-h-40 overflow-y-auto hidden">
+                        <div class="flex flex-wrap gap-1">
+                            ${headers
+                                .map(
+                                    (h) => `
+                                <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-[10px] text-slate-600 font-mono hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                                      onclick="insertToEditor('${h}')" title="点击插入">${h}</span>
+                            `,
+                                )
+                                .join("")}
+                        </div>
+                    </div>
+                </div>
+            `;
+                container.insertAdjacentHTML("afterbegin", tableHtml);
+                toggleSchema(tableName);
+            }
+
+            // --- Context Menu (通用逻辑) ---
+            function showMenu(menuId, x, y) {
+                const menu = document.getElementById(menuId);
+                const backdrop = document.getElementById("menu-backdrop");
+
+                // 隐藏其他所有菜单
+                document
+                    .querySelectorAll(".custom-context-menu")
+                    .forEach((el) => (el.style.display = "none"));
+
+                backdrop.classList.remove("hidden");
+                menu.style.display = "block";
+
+                const rect = menu.getBoundingClientRect();
+                if (x + rect.width > window.innerWidth) x -= rect.width;
+                if (y + rect.height > window.innerHeight) y -= rect.height;
+                menu.style.left = `${x}px`;
+                menu.style.top = `${y}px`;
+            }
+
+            function hideAllContextMenus() {
+                document
+                    .querySelectorAll(".custom-context-menu")
+                    .forEach((el) => (el.style.display = "none"));
+                document
+                    .getElementById("menu-backdrop")
+                    .classList.add("hidden");
+            }
+
+            // 1. 表格菜单
+            function showTableContextMenu(e, tableName) {
+                e.preventDefault();
+                tableContextMenuTarget = tableName;
+                showMenu("table-context-menu", e.clientX, e.clientY);
+            }
+
+            function deleteTargetTable() {
+                const target = tableContextMenuTarget;
+                if (!target) return;
+                hideAllContextMenus();
+                setTimeout(() => {
+                    if (confirm(`确定要删除表 "${target}" 吗?`)) {
+                        try {
+                            db.run(`DROP TABLE IF EXISTS "${target}"`);
+                            const el = document.getElementById(
+                                `schema-${target}`,
+                            );
+                            if (el) el.remove();
+                            const container =
+                                document.getElementById("schema-list");
+                            if (container.children.length === 0)
+                                container.innerHTML =
+                                    '<div class="text-center mt-10"><p class="text-[10px] text-slate-400 italic">暂无数据表</p></div>';
+                        } catch (err) {
+                            alert("删除失败: " + err.message);
+                        }
+                    }
+                }, 100);
+            }
+
+            function copyTargetTableName() {
+                const target = tableContextMenuTarget;
+                if (!target) return;
+
+                // 使用 execCommand 兼容更多环境
+                const textArea = document.createElement("textarea");
+                textArea.value = target;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand("copy");
+                } catch (err) {
+                    console.error("Copy failed", err);
+                }
+                document.body.removeChild(textArea);
+
+                hideAllContextMenus();
+            }
+
+            // 2. 编辑器菜单
+            function showEditorContextMenu(e, tabId, selectedText) {
+                editorSelectionTarget = { tabId, sql: selectedText };
+                showMenu("editor-context-menu", e.clientX, e.clientY);
+            }
+
+            function runSelectedFromMenu() {
+                if (!editorSelectionTarget) return;
+                hideAllContextMenus();
+                runQueryInTab(
+                    editorSelectionTarget.tabId,
+                    editorSelectionTarget.sql,
+                );
+            }
+
+            // ---
+
+            function toggleSchema(tableName) {
+                const cols = document.getElementById(`cols-${tableName}`);
+                const icon = document.getElementById(`icon-${tableName}`);
+                cols.classList.toggle("hidden");
+                if (cols.classList.contains("hidden"))
+                    icon.style.transform = "rotate(-90deg)";
+                else icon.style.transform = "rotate(0deg)";
+            }
+
+            function insertToEditor(text) {
+                if (!activeTabId) return;
+                const pane = document.getElementById(activeTabId);
+                const textarea = pane.querySelector(".sql-textarea");
+                textarea.value += ` "${text}"`;
+                textarea.focus();
+            }
+
+            // --- 核心查询逻辑 ---
+            function runQueryInTab(tabId, explicitSql = null) {
+                const pane = document.getElementById(tabId);
+                const textarea = pane.querySelector(".sql-textarea");
+                const exportBtn = pane.querySelector(".export-btn");
+
+                let sql = explicitSql;
+                if (!sql) {
+                    const selectedText = textarea.value
+                        .substring(
+                            textarea.selectionStart,
+                            textarea.selectionEnd,
+                        )
+                        .trim();
+                    if (selectedText) {
+                        sql = selectedText;
+                    } else {
+                        sql = textarea.value.trim();
+                    }
+                }
+
+                const errorOverlay = pane.querySelector(".error-overlay");
+                const stats = pane.querySelector(".result-stats");
+
+                errorOverlay.classList.add("hidden");
+                if (!sql) return;
+
+                try {
+                    const startTime = performance.now();
+                    const contents = db.exec(sql);
+                    const endTime = performance.now();
+                    const timeStr = (endTime - startTime).toFixed(1);
+
+                    if (contents.length === 0) {
+                        pane.queryResult = null; // 清空数据
+                        pane.sortState = { colIndex: -1, direction: "none" };
+
+                        const tbody = pane.querySelector(".result-tbody");
+                        const thead = pane.querySelector(".result-thead-tr");
+                        thead.innerHTML = "";
+                        tbody.innerHTML =
+                            '<tr><td class="p-8 text-center text-slate-400 text-xs">查询执行成功 (无返回行)</td></tr>';
+                        stats.textContent = `0 行 | ${timeStr}ms`;
+
+                        // 禁用导出按钮
+                        exportBtn.disabled = true;
+                        exportBtn.classList.add(
+                            "opacity-50",
+                            "cursor-not-allowed",
+                        );
+                    } else {
+                        const result = contents[0];
+                        // 保存数据到 Pane 对象，供排序使用
+                        pane.queryResult = {
+                            columns: result.columns,
+                            values: result.values,
+                            originalValues: [...result.values], // 备份原始顺序
+                        };
+                        pane.sortState = { colIndex: -1, direction: "none" }; // 重置排序
+
+                        renderResultTable(pane);
+                        stats.textContent = `${result.values.length} 行 | ${timeStr}ms`;
+
+                        // 启用导出按钮
+                        exportBtn.disabled = false;
+                        exportBtn.classList.remove(
+                            "opacity-50",
+                            "cursor-not-allowed",
+                        );
+                    }
+                } catch (err) {
+                    console.error(err);
+                    pane.querySelector(".error-msg").textContent = err.message;
+                    errorOverlay.classList.remove("hidden");
+                }
+            }
+
+            function renderResultTable(pane) {
+                const thead = pane.querySelector(".result-thead-tr");
+                const tbody = pane.querySelector(".result-tbody");
+
+                if (!pane.queryResult) return;
+                const { columns, values } = pane.queryResult;
+                const { colIndex, direction } = pane.sortState;
+
+                // 1. 渲染表头 (带排序功能)
+                thead.innerHTML = columns
+                    .map((c, i) => {
+                        let sortIcon = '<span class="sort-icon"></span>'; // 占位
+                        if (i === colIndex) {
+                            if (direction === "asc")
+                                sortIcon =
+                                    '<span class="sort-icon"><i class="fa-solid fa-sort-up ml-1 text-blue-500"></i></span>';
+                            else if (direction === "desc")
+                                sortIcon =
+                                    '<span class="sort-icon"><i class="fa-solid fa-sort-down ml-1 text-blue-500"></i></span>';
+                        }
+
+                        return `
+                <th class="px-4 py-2 bg-slate-50 border-b border-r border-slate-200 text-left text-xs font-semibold text-slate-600 tracking-wider last:border-r-0 whitespace-nowrap relative group select-none cursor-pointer hover:bg-slate-100 transition-colors"
+                    style="width: 150px;"
+                    ondblclick="toggleSort(event, ${i})"
+                    title="双击进行排序">
+                    <div class="flex items-center justify-between w-full h-full pointer-events-none">
+                        <span class="truncate block w-full">${c}${sortIcon}</span>
+                    </div>
+                    <div class="resizer-col" onmousedown="initColResize(event)"></div>
+                </th>
+            `;
+                    })
+                    .join("");
+
+                // 2. 渲染数据行
+                const limit = 500;
+                const displayData = values.slice(0, limit);
+
+                tbody.innerHTML = displayData
+                    .map(
+                        (row, idx) => `
+                <tr class="hover:bg-blue-50 transition-colors">
+                    ${row
+                        .map(
+                            (cell) => `
+                        <td class="truncate-cell px-4 py-1.5 border-b border-r border-slate-100 text-slate-700 font-mono text-xs last:border-r-0 max-w-xs" title="">
+                            ${cell === null ? '<span class="text-slate-300">NULL</span>' : cell}
+                        </td>
+                    `,
+                        )
+                        .join("")}
+                </tr>
+            `,
+                    )
+                    .join("");
+
+                if (values.length > limit) {
+                    tbody.insertAdjacentHTML(
+                        "beforeend",
+                        `<tr><td colspan="${columns.length}" class="p-2 text-center text-xs text-orange-600 bg-orange-50 font-bold border-t border-orange-200">仅展示前 ${limit} 行</td></tr>`,
+                    );
+                }
+            }
+
+            function initColResize(e) {
+                e.stopPropagation();
+                const th = e.target.parentElement;
+                const startX = e.clientX;
+                const startWidth = th.offsetWidth;
+
+                const onMouseMove = (moveEvent) => {
+                    const newWidth = startWidth + (moveEvent.clientX - startX);
+                    if (newWidth > 30) {
+                        th.style.width = `${newWidth}px`;
+                    }
+                };
+
+                const onMouseUp = () => {
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+                    document.body.style.cursor = "default";
+                };
+
+                document.addEventListener("mousemove", onMouseMove);
+                document.addEventListener("mouseup", onMouseUp);
+                document.body.style.cursor = "col-resize";
+            }
+        </script>
+    </body>
+</html>
