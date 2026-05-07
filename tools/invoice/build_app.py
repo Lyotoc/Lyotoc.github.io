@@ -4,7 +4,7 @@ import os
 import json
 
 # 1. 读取模板文件并编码
-template_path = '(V251101版)批量开票-导入开票模板.xlsx'
+template_path = '(V260401版)批量开票-导入开票模板.xlsx'
 with open(template_path, 'rb') as f:
     template_base64 = base64.b64encode(f.read()).decode()
 
